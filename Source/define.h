@@ -3,11 +3,10 @@
 
 struct language;
 struct symbol;
-struct token;
+
 
 typedef struct language language;
 typedef struct symbol symbol;
-typedef struct token token;
 
 
 
@@ -24,12 +23,6 @@ struct language
     int address; 
     int ORacrossLines;
     symbol* symbol;
-};
-
-struct token
-{
-    char* value;
-    token* next;
 };
 
 

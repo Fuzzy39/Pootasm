@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "literal.h"
 #include "define.h"
+#include "token.h"
 
 void literal(void)
 {
@@ -42,4 +43,5 @@ int main(void)
 {
     //literal();
     define();
+  
 }
