@@ -2,8 +2,10 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
+#include "literal.h"
 
-int isValidDigit(char digit, char base)
+
+static int isValidDigit(char digit, char base)
 {
     // this probably ought to be a switch statement, but I'm lazy.   
     if(base == 'b')
@@ -41,7 +43,7 @@ int isValidDigit(char digit, char base)
 // b - binary
 // x - hex
 // returns 1 if number is valid.
-int isValidNumber(char* number, char base)
+static int isValidNumber(char* number, char base)
 {
  
     while(*number !='\0')
@@ -106,7 +108,7 @@ int isLiteral( char* token)
 
 // returns the base character (b, o, d, or x) of a literal token (that has had its sign stripped)
 // the token is assumed valid.
-char getBase(char* token)
+static char getBase(char* token)
 {
     if(*token != '0')
     {
@@ -123,7 +125,7 @@ char getBase(char* token)
     return *token;
 }
 
-int charVal(char digit)
+static int charVal(char digit)
 {
     const char* values = "0123456789ABCDEF";
     for(int i = 0; i<strlen(values); i++)
@@ -138,7 +140,7 @@ int charVal(char digit)
     // should never happen, in any case.
 }
 
-int radixFromBase(char base)
+static int radixFromBase(char base)
 {
     
     switch(base)
@@ -159,7 +161,7 @@ int radixFromBase(char base)
 
 
 
-int isNumberInBounds(char* number, int radix, int bits)
+static int isNumberInBounds(char* number, int radix, int bits)
 {
    
 
@@ -229,7 +231,7 @@ int isLiteralInBounds(char* literal, int bits)
 
 // gets the value of a number string, assuming its value is 
 // within bounds.
-unsigned int strValue(char* number, char base)
+static unsigned int strValue(char* number, char base)
 {
    
     int radix = radixFromBase(base);
@@ -252,7 +254,7 @@ unsigned int strValue(char* number, char base)
 // it is known valid.
 // if the value is larger than UINT_MAX, it will return ULONG_MAX.
 // otherwise, the value will be within the range of an int.
-unsigned long long processLiteral(char* token)
+unsigned int processLiteral(char* token)
 {
     // process signs.
     int isNeg = 0;
@@ -294,38 +296,3 @@ unsigned long long processLiteral(char* token)
 }
 
 
-
-
-
-char input[100];
-
-int main(void)
-{
-    printf("This program will calculate numerical literals in decimal '200', binary '0b1101', ocatal '0o7321' and hexadecimal '0xFF36'\n");
- 
-   
-    while(1)
-    {
-        if(!scanf("%100s", &input[0]))
-        {
-            continue;
-        }
-
-        if(!isLiteral(input))
-        {
-            printf("Invalid literal.\n");
-            continue;
-        }
-
-        if(!isLiteralInBounds(input, 32))
-        {
-            printf("Value too large.\n");
-            continue;
-        }
-
-        unsigned int value = processLiteral(input);
-     
-        printf("Signed 32-bit Decimal Value: %d\n", (int)value);
-
-    }
-}
