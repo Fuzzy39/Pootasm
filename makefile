@@ -1,2 +1,2 @@
-make: Source/define.c Source/literal.c Source/test.c Source/token.c
-	gcc -g -Wall Source/define.c Source/literal.c Source/test.c Source/token.c -o pootasm.exe
+make: Source/*/* Source/*
+	gcc -g -Wall Source/*.c Source/Parsing/*.c -o pootasm.exe

@@ -1,2 +1,9 @@
-This should be read ;and this is a comment.
-Another line.
+This should be read ; this is totally a comment
+This is line 2.
+
+            and this is    line 4, but the third line with content.        
+
+;this shouldn't be read at all!
+
+line      8, or 4. ; hi
+     

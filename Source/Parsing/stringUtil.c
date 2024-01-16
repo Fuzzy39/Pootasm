@@ -3,22 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "token.h"
+#include "parsing.h"
+#include "stringUtil.h"
 
-void freeTokens(char* line, token* head)
-{
-    // we don't free any char* here because
-    // we're expecting nextline to deal with it.
-    while(head->next != NULL)
-    {
-       token* last = head;
-       head = head->next; 
-       free(last);
-    }
 
-    free(head);
-    free(line);
-}
 
 void toUppercase (char* string)
 {
@@ -52,6 +40,58 @@ static char* findNextContent(char* current)
     return current;
 }
 
+
+int getline(char** lineptr, size_t *n, FILE* stream)
+{
+    *n = 0;
+    int chars = 0;
+    
+    while(1)
+    {
+            
+        if(chars>=(*n))
+        {
+            *n += 100*sizeof(char);
+          
+            (*lineptr) = realloc(*lineptr, (*n)+2*sizeof(char));
+          
+            if(*lineptr == NULL)
+            {
+                printf("Malloc failed in getline.\n");
+                return EOF;
+            }
+        }
+
+        int ch = fgetc(stream);
+        if(ch == EOF)
+        {
+           
+            if(chars == 0)
+            {
+                return EOF;
+            } 
+            
+            (*lineptr)[chars] = '\n';
+            chars++;
+            (*lineptr)[chars] = '\0';
+            chars++;
+            return chars;
+        }
+
+
+        (*lineptr)[chars] = (char)ch;
+        chars++;
+        
+        if(ch == '\n')
+        {
+            (*lineptr)[chars] = '\0';
+            chars++;
+            return chars;
+        }
+        
+    }
+    
+}
 
 static char* makeToken(char* current, token** tail)
 {
@@ -132,69 +172,3 @@ token* makeTokens(char* line)
     return head;
 }
 
-void printTokens(token* head)
-{
-    if(head == NULL)
-    {
-        printf("No tokens.\n");
-        return;
-    }
-
-    while(head-> next != NULL)
-    {
-        printf("Token:'%s'\n", head->value);
-        head = head->next;
-    }
-    printf("Token:'%s'\n End line.\n", head->value);
-
-
-}
-
-
-int getline(char** lineptr, size_t *n, FILE* stream)
-{
-    *n = 0;
-    int chars = 0;
-   
-
-    while(1)
-    {
-            
-        if(chars>=(*n))
-        {
-            *n += 100*sizeof(char);
-          
-            (*lineptr) = realloc(*lineptr, (*n)+2*sizeof(char));
-          
-            if(*lineptr == NULL)
-            {
-                printf("Malloc failed in getline.\n");
-                return EOF;
-            }
-        }
-
-        int ch = fgetc(stream);
-        if(ch == EOF)
-        {
-           
-            (*lineptr)[chars] = '\n';
-            chars++;
-            (*lineptr)[chars] = '\0';
-            chars++;
-            return EOF;
-        }
-
-
-        (*lineptr)[chars] = (char)ch;
-        chars++;
-        
-        if(ch == '\n')
-        {
-            (*lineptr)[chars] = '\0';
-            chars++;
-            return chars;
-        }
-        
-    }
-    
-}

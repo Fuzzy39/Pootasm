@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
-#include "literal.h"
+#include "parsing.h"
 
 
 static int isValidDigit(char digit, char base)
@@ -59,16 +59,38 @@ static int isValidNumber(char* number, char base)
 }
 
 
-// returns 1 if the token is a valid literal.
-int isLiteral( char* token)
+// this will return 1 if the first character of the token is a digit, + or -.
+int isLiteral(token* token)
 {
-
-    if(*token == '+' || *token == '-')
+    char c = token->value[0];
+    // I recognize this part could be written in like 1 line, but I'm not super confident that it would
+    // always return 1 or 0.
+    if(isdigit(c))
     {
-        token+=sizeof(char);  
+        return 1;
     }
 
-    if(*token == '\0')
+    if(c=='+' || c=='-')
+    {
+        return 1;
+    }
+
+    return 0;
+
+
+}
+
+
+// returns 1 if the token is a valid literal.
+int isValidLiteral( token* token)
+{
+    char* val = token->value;
+    if(*val == '+' || *val == '-')
+    {
+        val+=sizeof(char);  
+    }
+
+    if(*val == '\0')
     {
         return 0; // we've got an empty string, or just + or -. that's not a number.
     }
@@ -76,33 +98,33 @@ int isLiteral( char* token)
     char base = 'd';
     
     // check if token is binary, octal, or hexadecimal.
-    if(*token == '0')
+    if(*val == '0')
     {
         
-        token+=sizeof(char);  
+        val+=sizeof(char);  
 
-        int isSpecial = *token == 'b' || *token == 'x' || *token == 'o';
+        int isSpecial = *val == 'b' || *val == 'x' || *val == 'o';
 
-        if(!(isdigit(*token) || isSpecial || *token =='\0') )
+        if(!(isdigit(*val) || isSpecial || *val =='\0') )
         {
             return 0; // something like 0q* or something. invalid.
         }
 
         if(isSpecial)
         {
-            base = *token;
+            base = *val;
         }
 
-        token +=sizeof(char);
+        val +=sizeof(char);
 
-        if(isSpecial && *token=='\0')
+        if(isSpecial && *val=='\0')
         {
             return 0; // we've got "0x" or something like that. invalid.
         }        
     }
 
     // by now we're just down the the numerical portion. if the number was decimal and started with a zero, we've verified the first two characters of it.
-    return isValidNumber(token, base);
+    return isValidNumber(val, base);
 }
 
 
@@ -203,8 +225,9 @@ static int isNumberInBounds(char* number, int radix, int bits)
 
 // returns nonzero if the given (valid) literal token fits within bounds bits
 // bits must be between 2 and 32 (inclusive).
-int isLiteralInBounds(char* literal, int bits)
+int isLiteralInBounds(token* token, int bits)
 {
+    char* literal = token->value;
     // we will discard the sign.
     if(*literal == '-')
     {
@@ -254,8 +277,9 @@ static unsigned int strValue(char* number, char base)
 // it is known valid.
 // if the value is larger than UINT_MAX, it will return ULONG_MAX.
 // otherwise, the value will be within the range of an int.
-unsigned int processLiteral(char* token)
+unsigned int processLiteral(token* literal)
 {
+    char* token = literal->value;
     // process signs.
     int isNeg = 0;
 

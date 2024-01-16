@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "define.h"
-#include "token.h"
-
+#include "Parsing/parsing.h"
 
 symbol* findSymbol(language* lang, char* name)
 {
@@ -19,7 +18,7 @@ symbol* findSymbol(language* lang, char* name)
     while(sym->next != NULL)
     {
         char* compareAgainst = sym->name;
-        if(0==strcmp(name, compareAgainst)) 
+        if(strcmp(name, compareAgainst) == 0) 
         {
             // Now, my understanding is this method will only return 0 if the strings exactly match.
             // if that's not the case then this is obviously wrong.
@@ -47,23 +46,17 @@ language* readDefines(char* fileName)
         return NULL;
     }
 
+    token* head = NULL;
     char* line = NULL;
-    size_t len = 0; // don't care about this.
-    if(getline(&line, &len, definesFile) == EOF)
+    while(GetTokensFromNextLine(&head, definesFile, &line)!=EOF)
     {
-        printf("Line failed to read...(got:'%s')\n", line);
-        return NULL;
+        printf("Next.\n");
+        printTokens(head);
+       
+        freeTokens(line, head);
+        head = NULL;
+        line = NULL;
     }
-    printf("got: '%s'\n", line);
-
-    toUppercase(line);
-
-    
-    token* head = makeTokens(line);
-    printTokens(head);
-    // cleanup.
-
-    freeTokens(line, head);
 
     return NULL;
 

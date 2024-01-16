@@ -3,5 +3,7 @@
         "ctype.h": "c",
         "stdio.h": "c",
         "string.h": "c"
-    }
+    },
+    "makefile.makePath": "mingw32-make",
+    "makefile.defaultLaunchConfiguration": null
 }
