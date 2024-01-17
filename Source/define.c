@@ -6,6 +6,9 @@
 #include "define.h"
 #include "Parsing/parsing.h"
 
+static const char* WidthExplain = "Expected Syntax: \"WIDTH <bits>\".\n";
+static const char* AddressExplain = "Expected Syntax: \"ADDRESSS <words>\"\n";
+
 symbol* findSymbol(language* lang, char* name)
 {
     symbol* sym = lang->symbol;
@@ -31,66 +34,106 @@ symbol* findSymbol(language* lang, char* name)
     return NULL;
 }
 
-
-
-static language* processHeader(int* lineNum, FILE* file, line** line)
+static int checkLiteral(int* lineNum, token* token)
 {
-   
-    const char* WidthExplain = "Expected Syntax: \"WIDTH <bits>\".\n";
-    *line = NULL;
-    if(GetTokensFromNextLine(line, file, *lineNum)==EOF)
+    if(!isLiteral(token))
     {
-        printf("Line %d: Expected WIDTH declaration. \n%s", *lineNum, WidthExplain);
-        return NULL;
-    }
-    //printLine(*line);
-    *lineNum = (*line)->lineNum;
-
-    if(strcmp((*line)->head->value, "WIDTH")!=0)
-    {
-        printf("Line %d: Expected WIDTH declaration.\n%s", *lineNum, WidthExplain);
-        return NULL;
+        printf("Line %d: Expected number literal instead of '%s'.\n", *lineNum, token->value); 
+        return 0;  
     }
 
-    if(tokenCount(*line) != 2)
+    if(!isValidLiteral(token))
     {
-        printf("Line %d: Wrong syntax for WIDTH declaration. \n%s", *lineNum, WidthExplain); 
-        return NULL;  
+        printf("Line %d: Expected number literal instead of '%s'.\n", *lineNum, token->value); 
+        return 0;  
     }
 
-    token* widthTok = (*line)->head->next; 
-    if(!isLiteral(widthTok))
+    if(!isLiteralInBounds(token, 32))
     {
-        printf("Line %d: Expected number literal instead of '%s'.\n%s", *lineNum, widthTok->value, WidthExplain); 
-        return NULL;  
+        printf("Line %d: literal value too large. Pootasm supports literals that are a maximum of 32 bits wide.\n", *lineNum); 
+        return 0;  
     }
 
-    if(!isValidLiteral(widthTok))
+
+    return 1;
+}
+
+
+
+static int getWidth(int lineNum, line* line)
+{
+    if(strcmp(line->head->value, "WIDTH")!=0)
     {
-        printf("Line %d: Expected number literal instead of '%s'.\n%s", *lineNum, widthTok->value, WidthExplain); 
-        return NULL;  
+        printf("Line %d: Expected WIDTH declaration.\n%s", lineNum, WidthExplain);
+        return 0;
     }
 
-    if(!isLiteralInBounds(widthTok, 32))
+    if(tokenCount(line) != 2)
     {
-        printf("Line %d: WIDTH too large. Supported values are 2-32.\n", *lineNum); 
-        return NULL;  
+        printf("Line %d: Wrong syntax for WIDTH declaration. \n%s", lineNum, WidthExplain); 
+        return 0;  
+    }
+
+    token* widthTok = (line)->head->next; 
+    if(!checkLiteral(&lineNum, widthTok))
+    {
+        printf("%s", WidthExplain);
+        return 0;
     }
 
     unsigned int width = processLiteral(widthTok);
 
     if(width>32 || width<2)
     {
-        printf("Line %d: WIDTH of %d is invalid. Supported values are 2-32.\n", *lineNum, width); 
-        return NULL;  
+        printf("Line %d: WIDTH of %d is invalid. Supported values are 2-32.\n", lineNum, width); 
+        return 0;  
     }
 
+    return width;
+}
+
+
+static language* processHeader(int* lineNum, FILE* file, line** line)
+{
+   
+    // ########### WIDTH #############
+    *line = NULL;
+    if(GetTokensFromNextLine(line, file, *lineNum)==EOF)
+    {
+        printf("Line %d: Expected WIDTH declaration. \n%s", *lineNum, WidthExplain);
+        
+        freeLine(*line);
+        *line = NULL;
+        return NULL;
+    }
+
+    *lineNum = (*line)->lineNum;
+
+    int width = getWidth(*lineNum, *line);
+    if(width == 0)
+    {
+        freeLine(*line);
+        *line = NULL;
+        return NULL;
+    }
+  
     printf("I'm happy with a WIDTH of %d!\n", width);
-    printf("Lines after line %d were not processed.\n", *lineNum);
+   
 
    
     freeLine(*line);
     *line = NULL;
+
+    if(GetTokensFromNextLine(line, file, *lineNum)==EOF)
+    {
+        printf("Line %d: Expected ADDRESS declaration. \n%s", *lineNum, WidthExplain);
+        
+        freeLine(*line);
+        *line = NULL;
+        return NULL;
+    }
+
+
     return NULL;
 
 }
