@@ -33,6 +33,70 @@ symbol* findSymbol(language* lang, char* name)
 
 
 
+static language* processHeader(int* lineNum, FILE* file, line** line)
+{
+   
+    const char* WidthExplain = "Expected Syntax: \"WIDTH <bits>\".\n";
+    *line = NULL;
+    if(GetTokensFromNextLine(line, file, *lineNum)==EOF)
+    {
+        printf("Line %d: Expected WIDTH declaration. \n%s", *lineNum, WidthExplain);
+        return NULL;
+    }
+    //printLine(*line);
+    *lineNum = (*line)->lineNum;
+
+    if(strcmp((*line)->head->value, "WIDTH")!=0)
+    {
+        printf("Line %d: Expected WIDTH declaration.\n%s", *lineNum, WidthExplain);
+        return NULL;
+    }
+
+    if(tokenCount(*line) != 2)
+    {
+        printf("Line %d: Wrong syntax for WIDTH declaration. \n%s", *lineNum, WidthExplain); 
+        return NULL;  
+    }
+
+    token* widthTok = (*line)->head->next; 
+    if(!isLiteral(widthTok))
+    {
+        printf("Line %d: Expected number literal instead of '%s'.\n%s", *lineNum, widthTok->value, WidthExplain); 
+        return NULL;  
+    }
+
+    if(!isValidLiteral(widthTok))
+    {
+        printf("Line %d: Expected number literal instead of '%s'.\n%s", *lineNum, widthTok->value, WidthExplain); 
+        return NULL;  
+    }
+
+    if(!isLiteralInBounds(widthTok, 32))
+    {
+        printf("Line %d: WIDTH too large. Supported values are 2-32.\n", *lineNum); 
+        return NULL;  
+    }
+
+    unsigned int width = processLiteral(widthTok);
+
+    if(width>32 || width<2)
+    {
+        printf("Line %d: WIDTH of %d is invalid. Supported values are 2-32.\n", *lineNum, width); 
+        return NULL;  
+    }
+
+    printf("I'm happy with a WIDTH of %d!\n", width);
+    printf("Lines after line %d were not processed.\n", *lineNum);
+
+   
+    freeLine(*line);
+    *line = NULL;
+    return NULL;
+
+}
+
+
+
 language* readDefines(char* fileName)
 {
     FILE* definesFile = fopen(fileName, "r");
@@ -46,18 +110,10 @@ language* readDefines(char* fileName)
         return NULL;
     }
 
-    token* head = NULL;
-    char* line = NULL;
-    while(GetTokensFromNextLine(&head, definesFile, &line)!=EOF)
-    {
-        printf("Next.\n");
-        printTokens(head);
-       
-        freeTokens(line, head);
-        head = NULL;
-        line = NULL;
-    }
+    line* line = NULL;
+    int lineNum = 0;
 
+    processHeader(&lineNum, definesFile, &line);
     return NULL;
 
 

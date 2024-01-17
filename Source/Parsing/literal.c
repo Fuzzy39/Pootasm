@@ -8,25 +8,25 @@
 static int isValidDigit(char digit, char base)
 {
     // this probably ought to be a switch statement, but I'm lazy.   
-    if(base == 'b')
+    if(base == 'B')
     {
         char* matches = "01";
         return strchr(matches, digit) != NULL;
     }
 
-    if(base == 'o')
+    if(base == 'O')
     {
         char* matches = "01234567";
         return strchr(matches, digit) != NULL;
     }
 
-    if(base == 'd')
+    if(base == 'D')
     {
         char* matches = "0123456789";
         return strchr(matches, digit) != NULL;
     }
 
-    if(base == 'x')
+    if(base == 'X')
     {
         char* matches = "0123456789ABCDEF";
         return strchr(matches, digit) != NULL;
@@ -95,7 +95,7 @@ int isValidLiteral( token* token)
         return 0; // we've got an empty string, or just + or -. that's not a number.
     }
 
-    char base = 'd';
+    char base = 'D';
     
     // check if token is binary, octal, or hexadecimal.
     if(*val == '0')
@@ -103,7 +103,7 @@ int isValidLiteral( token* token)
         
         val+=sizeof(char);  
 
-        int isSpecial = *val == 'b' || *val == 'x' || *val == 'o';
+        int isSpecial = *val == 'B' || *val == 'X' || *val == 'O';
 
         if(!(isdigit(*val) || isSpecial || *val =='\0') )
         {
@@ -134,14 +134,14 @@ static char getBase(char* token)
 {
     if(*token != '0')
     {
-        return 'd';
+        return 'D';
     }
 
     token += sizeof(char);
 
     if(isdigit(*token))
     {
-        return 'd';
+        return 'D';
     }
 
     return *token;
@@ -167,11 +167,11 @@ static int radixFromBase(char base)
     
     switch(base)
     {
-        case 'b':
+        case 'B':
             return 2;       
-        case 'o':
+        case 'O':
             return 8;
-        case 'd':
+        case 'D':
             return 10;
             break;
         default:
@@ -242,7 +242,7 @@ int isLiteralInBounds(token* token, int bits)
 
     char base = getBase(literal);
 
-    if(base != 'd')
+    if(base != 'D')
     {
         literal += sizeof(char)*2;
     }
@@ -296,7 +296,7 @@ unsigned int processLiteral(token* literal)
 
     char base = getBase(token);
 
-    if(base != 'd')
+    if(base != 'D')
     {
         token += sizeof(char)*2;
     }

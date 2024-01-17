@@ -7,6 +7,9 @@
 struct token;
 typedef struct token token;
 
+struct line;
+typedef struct line line;
+
 struct token
 {
     char* value;
@@ -14,31 +17,38 @@ struct token
 };
 
 
+struct line
+{
+    int lineNum;
+    char* linestart;
+    token* head;
+};
+
 
 // ################ TOKENS #################
 
 /// @brief Frees the line of text and the tokens created from it.
 /// @param head 
-void freeTokens(char* line, token* head);
+void freeLine(line* line);
 
 /// @brief Prints out a linked list of tokens.
 /// @param head 
-void printTokens(token* head);
+void printLine(line* line);
 
 /// @brief Gets the number of tokens in a linked list.
 /// @param head 
-int tokenCount(token* head);
+int tokenCount(line* line);
 
 /// @brief Get the nth token in a linked list.
 /// @param head 
 /// @param index 
-token* getToken(token* head, int index);
+token* getToken(line* line, int index);
 
 /// @brief fills *head with a linked list of tokens from the next line with content.
 /// @param head A probably null pointer. will be filled with tokens on success.
 /// @param stream 
 /// @return returns 1 on success. returns -1 on eof.
-int GetTokensFromNextLine(token** head, FILE* stream, char** line);
+int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber);
 
 
 // ######################### LITERALS #####################

@@ -6,10 +6,11 @@
 #include "parsing.h"
 #include "stringUtil.h"
 
-void freeTokens(char* line, token* head)
+void freeLine(line* line)
 {
     // we don't free any char* here because
     // we're expecting nextline to deal with it.
+    token* head = line->head;
     while(head->next != NULL)
     {
        token* last = head;
@@ -18,6 +19,7 @@ void freeTokens(char* line, token* head)
     }
 
     free(head);
+    free(line->linestart);
     free(line);
 }
 
@@ -39,9 +41,40 @@ void printTokens(token* head)
 
 }
 
-
-int tokenCount(token* head)
+void printLine(line* line)
 {
+    if(line == NULL)
+    {
+        printf("No line. Did something go wrong?\n");
+        return;
+    }
+
+    printf("Line %d: ", line->lineNum);
+
+    token* tok = line->head;
+
+    while(tok != NULL)
+    {
+        printf("'%s'", tok->value);
+        if(tok->next ==NULL)
+        {
+            putc(' ', stdout);
+        }
+        else
+        {
+            printf(", ");
+        }
+
+        tok = tok->next;
+    }
+
+    printf("\n");
+}
+
+
+int tokenCount(line* line)
+{
+    token* head = line->head;
     int toReturn = 1;
     while(head->next != NULL)
     {
@@ -52,9 +85,9 @@ int tokenCount(token* head)
     return toReturn;
 }
 
-token* getToken(token* head, int index)
+token* getToken(line* line, int index)
 {
-
+    token* head = line->head;
     while(index>0)
     {
         if(head == NULL)
@@ -82,15 +115,36 @@ static int getTokensFromLine(token** head, FILE* stream, char** line)
     return 1;
 }
 
-int GetTokensFromNextLine(token** head, FILE* stream, char** line)
+int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
 {
-    
-    while(*head == NULL)
+    // start off by initializing the line struct.
+    *line = malloc(sizeof(struct line));
+   
+    if(line == NULL)
     {
-        if(getTokensFromLine(head, stream, line)==EOF)
+        printf("malloc failed in GetTokensFromNextLine (token.c)\n");
+        return EOF;
+    }
+
+
+    (*line)->lineNum = lastLineNumber;
+    (*line)->linestart = NULL;
+    (*line)->head = NULL;
+
+
+    while( (*line)->head == NULL)
+    {
+        (*line)->lineNum++;
+
+        if(getTokensFromLine(&((*line)->head), stream, &((*line)->linestart))==EOF)
         {
+            // if this method returns EOF then tokens are never initialized.
+            free((*line)->linestart);
+            free(*line);
+
             return EOF;
         }
+
     }
 
     return 1;
