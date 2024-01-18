@@ -103,6 +103,11 @@ int isValidLiteral( token* token)
         
         val+=sizeof(char);  
 
+        if(*val == '\0')
+        {
+            return 1;
+        }
+        
         int isSpecial = *val == 'B' || *val == 'X' || *val == 'O';
 
         if(!(isdigit(*val) || isSpecial || *val =='\0') )
@@ -139,6 +144,11 @@ static char getBase(char* token)
 
     token += sizeof(char);
 
+    if(*token == '\0')
+    {
+        return 'D';
+    }
+    
     if(isdigit(*token))
     {
         return 'D';

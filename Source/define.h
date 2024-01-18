@@ -13,20 +13,25 @@ typedef struct symbol symbol;
 struct symbol
 {
     char* name;
-    int value;
+    unsigned int value;
     symbol* next;
 };
 
 struct language
 {
-    int width;
-    int address; 
-    int ORacrossLines;
-    symbol* symbol;
+    unsigned int width;
+    unsigned int address; 
+    symbol* head;
 };
 
 
 symbol* findSymbol(language* lang, char* name);
+
+int symbolCount(language* lang);
+
+void printLanguage(language* lang);
+
+void freeLanguage(language* lang);
 
 language* readDefines(char* fileName);
 
