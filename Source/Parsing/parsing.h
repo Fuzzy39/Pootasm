@@ -74,4 +74,7 @@ int isLiteralInBounds(token* literal, int bits);
 /// @return returns the value of the literal.
 unsigned int processLiteral(token* literal);
 
+
+int printAsLiteral(int num, int bits, char base, FILE* stream);   
+
 #endif

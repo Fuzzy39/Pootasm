@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 #include "parsing.h"
 
 
@@ -184,9 +185,10 @@ static int radixFromBase(char base)
         case 'D':
             return 10;
             break;
-        default:
+        case 'X':
             return 16;
-        
+        default:
+            return -1;
     }
 }
 
@@ -328,5 +330,78 @@ unsigned int processLiteral(token* literal)
     return toReturn;
 
 }
+
+// y can't be 0 or negative
+// y should be small or this overflows
+// it's fine, for our case.
+static long long intPow(long long x, int y)
+{
+    long long toRet = x;
+    y--;
+    while(y>0)
+    {
+        toRet*=x;
+        y--;
+    }
+
+    return toRet;
+}
+
+
+int printAsLiteral(int num, int bits, char base, FILE* stream)
+{
+    int radix = radixFromBase(base);
+    if(radix == -1)
+    {
+        // base was bad.
+        return 0;
+    }
+
+    // next, get how many digits the number should be
+    int digits = 1;
+    int max = radix-1;
+    while(1)
+    {
+        //printf("target: %ld current %d digits: %d\n", intPow(2, bits)-1, max, digits);
+        if((intPow(2, bits)-1)<=max)
+        {
+            break;
+        }
+        digits++;
+        max=intPow(radix,digits)-1;
+       
+    }
+
+    // digits should be right now?
+    char* toPrint = malloc((digits+1)*sizeof(char));
+    if(toPrint == NULL)
+    {
+        return 0;
+    }
+
+    if(!itoa(num, toPrint, radix))
+    {
+        printf("itoa failed");
+        free(toPrint);
+        return 0;
+    }
+
+    int zeros = digits-strlen(toPrint);
+    //printf("DIGITS: %d, ZEROS: %d\n", digits, zeros);
+    if(zeros)
+    {
+        fprintf(stream, "%0*d%s", zeros, 0, toPrint);
+    }
+    else
+    {
+        fprintf(stream, "%s", toPrint);
+    }
+
+    free(toPrint);
+    return 1;
+
+    
+}
+
 
 

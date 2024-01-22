@@ -35,10 +35,10 @@ symbol* findSymbol(language* lang, char* name)
     return NULL;
 }
 
-int symbolCount(language* lang)
+int symbolCount(symbol* head)
 {
     int count = 0;
-    symbol* sym = lang->head;
+    symbol* sym = head;
     while(sym!=NULL)
     {
         count++;
@@ -61,7 +61,7 @@ void printLanguage(language* lang)
     printf("ADDRESS: %d bits.\n", (lang->width)*(lang->address));
 
     // print symbols now.
-    printf("\n%d symbols:\n", symbolCount(lang));
+    printf("\n%d symbols:\n", symbolCount(lang->head));
     symbol* sym = lang->head;
 
     while(sym != NULL)
@@ -282,6 +282,13 @@ static symbol* readSymbol(line* line)
     if(isLiteral(name))
     {
         printf("Line %d: Wrong syntax for SYMBOL declaration. Expected a name, not '%s'\n%s", line->lineNum, name->value, SymbolExplain);
+        free(sym);
+        return NULL;
+    }
+
+    if(*(name->value) == '.')
+    {
+        printf("Line %d: Wrong syntax for SYMBOL declaration. Symbol name '%s' cannot begin with a '.'. \n%s", line->lineNum, name->value, SymbolExplain);
         free(sym);
         return NULL;
     }

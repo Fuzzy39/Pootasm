@@ -27,7 +27,7 @@ struct language
 
 symbol* findSymbol(language* lang, char* name);
 
-int symbolCount(language* lang);
+int symbolCount(symbol* head);
 
 void printLanguage(language* lang);
 
