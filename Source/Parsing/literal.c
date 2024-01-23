@@ -347,7 +347,9 @@ static long long intPow(long long x, int y)
     return toRet;
 }
 
-
+// this function doesn't do its job very well. large bits and bases make it hang.
+// will I fix it?
+// no.
 int printAsLiteral(int num, int bits, char base, FILE* stream)
 {
     int radix = radixFromBase(base);
@@ -401,6 +403,31 @@ int printAsLiteral(int num, int bits, char base, FILE* stream)
     return 1;
 
     
+}
+
+
+int checkLiteral(int* lineNum, token* token, char* filename)
+{
+    if(!isLiteral(token))
+    {
+        printf("Error in '%s', Line %d: Expected number literal instead of '%s'.\n", filename, *lineNum, token->value); 
+        return 0;  
+    }
+
+    if(!isValidLiteral(token))
+    {
+        printf("Error in '%s', Line %d: Expected number literal instead of '%s'.\n", filename, *lineNum, token->value); 
+        return 0;  
+    }
+
+    if(!isLiteralInBounds(token, 32))
+    {
+        printf("Error in '%s', Line %d: literal value too large. Pootasm supports literals that are a maximum of 32 bits wide.\n", filename, *lineNum); 
+        return 0;  
+    }
+
+
+    return 1;
 }
 
 

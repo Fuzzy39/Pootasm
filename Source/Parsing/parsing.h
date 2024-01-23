@@ -77,4 +77,11 @@ unsigned int processLiteral(token* literal);
 
 int printAsLiteral(int num, int bits, char base, FILE* stream);   
 
+/// @brief checks if a token is a valid literal.
+/// @param lineNum 
+/// @param token 
+/// @param filename 
+/// @return 
+int checkLiteral(int* lineNum, token* token, char* filename);
+
 #endif

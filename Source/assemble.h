@@ -44,7 +44,7 @@ struct chunk
 
 
 
-output* decodeSymbols(char* filename);
+output* firstPass(char* filename);
 
 output* decodeLabels(output* partial, char* filename);
 

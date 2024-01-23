@@ -14,8 +14,8 @@ void define()
 int main(void)
 {
     
-    output* out = decodeSymbols("test.txt");
-    debugPrintOutput(out, 'X');
+    output* out = firstPass("test.txt");
+    debugPrintOutput(out, 'D');
     freeOutput(out);
 
 }

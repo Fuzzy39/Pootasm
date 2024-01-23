@@ -1,1 +1,7 @@
 .def def.txt
+.org 0
+    You could imagine code going here,
+    but the assembler ignores this for now.
+    
+.org 0o40 ; 40 octal, should be 20 in hex. 
+    What a shame.

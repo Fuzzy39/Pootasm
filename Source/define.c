@@ -88,48 +88,22 @@ void freeLanguage(language* lang)
 }
 
 
-static int checkLiteral(int* lineNum, token* token)
-{
-    if(!isLiteral(token))
-    {
-        printf("Line %d: Expected number literal instead of '%s'.\n", *lineNum, token->value); 
-        return 0;  
-    }
-
-    if(!isValidLiteral(token))
-    {
-        printf("Line %d: Expected number literal instead of '%s'.\n", *lineNum, token->value); 
-        return 0;  
-    }
-
-    if(!isLiteralInBounds(token, 32))
-    {
-        printf("Line %d: literal value too large. Pootasm supports literals that are a maximum of 32 bits wide.\n", *lineNum); 
-        return 0;  
-    }
-
-
-    return 1;
-}
-
-
-
-static int getWidth(int lineNum, line* line)
+static int getWidth(int lineNum, line* line, char* filename)
 {
     if(strcmp(line->head->value, "WIDTH")!=0)
     {
-        printf("Line %d: Expected WIDTH declaration.\n%s", lineNum, WidthExplain);
+        printf("Error in '%s', Line %d: Expected WIDTH declaration.\n%s", filename, lineNum, WidthExplain);
         return 0;
     }
 
     if(tokenCount(line) != 2)
     {
-        printf("Line %d: Wrong syntax for WIDTH declaration. \n%s", lineNum, WidthExplain); 
+        printf("Error in '%s', Line %d: Wrong syntax for WIDTH declaration. \n%s", filename, lineNum, WidthExplain); 
         return 0;  
     }
 
     token* widthTok = (line)->head->next; 
-    if(!checkLiteral(&lineNum, widthTok))
+    if(!checkLiteral(&lineNum, widthTok, filename))
     {
         printf("%s", WidthExplain);
         return 0;
@@ -139,7 +113,7 @@ static int getWidth(int lineNum, line* line)
 
     if(width>32 || width<2)
     {
-        printf("Line %d: WIDTH of %d is invalid. Supported values are 2-32.\n", lineNum, width); 
+        printf("Error in '%s', Line %d: WIDTH of %d is invalid. Supported values are 2-32.\n", filename, lineNum, width); 
         return 0;  
     }
 
@@ -148,22 +122,24 @@ static int getWidth(int lineNum, line* line)
 
 
 
-static int getAddress(int lineNum, line* line, unsigned int width)
+static int getAddress(int lineNum, line* line, unsigned int width, char* filename)
 {
+
+
     if(strcmp(line->head->value, "ADDRESS")!=0)
     {
-        printf("Line %d: Expected ADDRESS declaration.\n%s", lineNum, AddressExplain);
+        printf("Error in '%s', Line %d: Expected ADDRESS declaration.\n%s", filename, lineNum, AddressExplain);
         return 0;
     }
 
     if(tokenCount(line) != 2)
     {
-        printf("Line %d: Wrong syntax for ADDRESS declaration. \n%s", lineNum, AddressExplain); 
+        printf("Error in '%s', Line %d: Wrong syntax for ADDRESS declaration. \n%s", filename, lineNum, AddressExplain); 
         return 0;  
     }
 
     token* addrTok = (line)->head->next; 
-    if(!checkLiteral(&lineNum, addrTok))
+    if(!checkLiteral(&lineNum, addrTok, filename))
     {
         printf("%s", AddressExplain);
         return 0;
@@ -173,7 +149,7 @@ static int getAddress(int lineNum, line* line, unsigned int width)
 
     if(address==0 || address*width>32)
     {
-        printf("Line %d: ADDRESS of %d is invalid. The product of WIDTH and ADDRESS must be nonzero and less than 32.\n", lineNum, address); 
+        printf("Error in '%s', Line %d: ADDRESS of %d is invalid. The product of WIDTH and ADDRESS must be nonzero and less than 32.\n", filename, lineNum, address); 
         return 0;  
     }
 
@@ -182,7 +158,7 @@ static int getAddress(int lineNum, line* line, unsigned int width)
 
 
 
-static language* processHeader(int* lineNum, FILE* file)
+static language* processHeader(int* lineNum, FILE* file, char* filename)
 {
     language* lang = malloc(sizeof(language));
 
@@ -198,7 +174,7 @@ static language* processHeader(int* lineNum, FILE* file)
     line* line = NULL;
     if(GetTokensFromNextLine(&line, file, *lineNum)==EOF)
     {
-        printf("Line %d: Expected WIDTH declaration. \n%s", *lineNum+1, WidthExplain);
+        printf("Error in '%s', Line %d: Expected WIDTH declaration. \n%s", filename, *lineNum+1, WidthExplain);
         
         freeLanguage(lang);
         freeLine(line);
@@ -208,7 +184,7 @@ static language* processHeader(int* lineNum, FILE* file)
 
     *lineNum = (line)->lineNum;
 
-    lang->width = getWidth(*lineNum, line);
+    lang->width = getWidth(*lineNum, line, filename);
     if(lang->width == 0)
     {
         freeLanguage(lang);
@@ -226,7 +202,7 @@ static language* processHeader(int* lineNum, FILE* file)
 
     if(GetTokensFromNextLine(&line, file, *lineNum)==EOF)
     {
-        printf("Line %d: Expected ADDRESS declaration. \n%s", *lineNum+1, AddressExplain);
+        printf("Error in '%s', Line %d: Expected ADDRESS declaration. \n%s", filename, *lineNum+1, AddressExplain);
         
         freeLanguage(lang);
         freeLine(line);
@@ -237,7 +213,7 @@ static language* processHeader(int* lineNum, FILE* file)
     *lineNum = (line)->lineNum;
 
 
-    lang->address = getAddress(*lineNum, line, lang->width);
+    lang->address = getAddress(*lineNum, line, lang->width, filename);
     if(lang->address == 0)
     {
         freeLanguage(lang);
@@ -252,17 +228,17 @@ static language* processHeader(int* lineNum, FILE* file)
 
 }
 
-static symbol* readSymbol(line* line)
+static symbol* readSymbol(line* line, char* filename)
 {
     if(strcmp(line->head->value, "SYMBOL")!=0)
     {
-        printf("Line %d: Unknown declaration '%s'. Valid declarations are: SYMBOL.\n", line->lineNum, line->head->value);
+        printf("Error in '%s', Line %d: Unknown declaration '%s'. Valid declarations are: SYMBOL.\n", filename, line->lineNum, line->head->value);
         return NULL;
     }
 
     if(tokenCount(line)!=3)
     {
-        printf("Line %d: Wrong syntax for SYMBOL declaration.\n%s", line->lineNum, SymbolExplain);
+        printf("Error in '%s', Line %d: Wrong syntax for SYMBOL declaration.\n%s", filename, line->lineNum, SymbolExplain);
         return NULL;
     }
 
@@ -281,14 +257,14 @@ static symbol* readSymbol(line* line)
 
     if(isLiteral(name))
     {
-        printf("Line %d: Wrong syntax for SYMBOL declaration. Expected a name, not '%s'\n%s", line->lineNum, name->value, SymbolExplain);
+        printf("Error in '%s', Line %d: Wrong syntax for SYMBOL declaration. Expected a name, not '%s'\n%s", filename, line->lineNum, name->value, SymbolExplain);
         free(sym);
         return NULL;
     }
 
     if(*(name->value) == '.')
     {
-        printf("Line %d: Wrong syntax for SYMBOL declaration. Symbol name '%s' cannot begin with a '.'. \n%s", line->lineNum, name->value, SymbolExplain);
+        printf("Error in '%s', Line %d: Wrong syntax for SYMBOL declaration. Symbol name '%s' cannot begin with a '.'. \n%s", filename, line->lineNum, name->value, SymbolExplain);
         free(sym);
         return NULL;
     }
@@ -303,7 +279,7 @@ static symbol* readSymbol(line* line)
     }
 
     
-    if(!checkLiteral(&(line->lineNum), value))
+    if(!checkLiteral(&(line->lineNum), value, filename))
     {
         printf("%s", SymbolExplain);
         free(sym->name);
@@ -319,7 +295,7 @@ static symbol* readSymbol(line* line)
 }
 
 
-static int readSymbols(int* lineNum, FILE* file, language* lang)
+static int readSymbols(int* lineNum, FILE* file, language* lang, char* filename)
 {
     
    
@@ -332,7 +308,7 @@ static int readSymbols(int* lineNum, FILE* file, language* lang)
         
         *lineNum = line->lineNum;
 
-        symbol* sym = readSymbol(line);
+        symbol* sym = readSymbol(line, filename);
 
         if(sym == NULL)
         {
@@ -366,25 +342,25 @@ static int readSymbols(int* lineNum, FILE* file, language* lang)
 language* readDefines(char* fileName)
 {
     FILE* definesFile = fopen(fileName, "r");
-
+    
     // fopen sets errno, but I'm lazy.
     if(definesFile == NULL)
     {
-        printf("There was a problem opening the language definition file '%s'. Does the file exist?\n", fileName);
+        printf("Language definition '%s' could not be opened. Does the file exist?\n", fileName);
         // really any number of things could've gone wrong, but meh.
         // since when does malloc fail, right?
         return NULL;
     }
 
     int lineNum = 0;
-    language* toReturn = processHeader(&lineNum, definesFile);
+    language* toReturn = processHeader(&lineNum, definesFile, fileName);
     if(toReturn==NULL)
     {
         fclose(definesFile);
         return NULL;
     }
 
-    if(!readSymbols(&lineNum, definesFile, toReturn))
+    if(!readSymbols(&lineNum, definesFile, toReturn, fileName))
     {
         fclose(definesFile);
         return NULL;

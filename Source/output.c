@@ -6,6 +6,50 @@
 
 
 
+static void freeSection(section* sect)
+{
+    // basically we just need to free chunks and then ourself.
+    // we expect the caller to keep a hold of the next element.
+    chunk* ch = sect->head;
+    while(ch != NULL)
+    {
+        free(ch->data);
+        free(ch->label);
+        chunk* next = ch->next;
+        free(ch);
+        ch = next;
+    }
+    free(sect);
+}
+
+void freeOutput(output* output)
+{
+    if(output==NULL)
+    {
+        return;
+    }
+
+    freeLanguage(output->lang);
+    symbol* sym = output->labels;
+
+    while(sym != NULL)
+    {
+        free(sym->name);
+        symbol* next = sym->next;
+        free(sym);
+        sym = next;
+    }
+
+    // free sections
+    section* sect = output->head;
+    while(sect != NULL)
+    {
+        section* next = sect->next;
+        freeSection(sect);
+        sect = next;
+    }
+}
+
 
 static void printChunk(language* lang, chunk* ch, char base)
 {
@@ -47,13 +91,11 @@ static void printChunk(language* lang, chunk* ch, char base)
 
 static void printSection(language* lang, section* sect, char base)
 {
-    int addr = lang->width*lang->address;
 
-    printf("Section @");
-    if(!printAsLiteral(sect->location, addr, base, stdout))
-    {
-        printf("ERROR");
-    }
+
+    printf("Section @0x%X", sect->location);
+    // this is 32 bits since an address can be any size, really.
+  
     printf(":\n");
 
     // Now just print chunks. it's that easy!

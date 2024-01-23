@@ -10,6 +10,15 @@ void freeLine(line* line)
 {
     // we don't free any char* here because
     // we're expecting nextline to deal with it.
+    //printLine(line);
+
+    if(line == NULL)
+    {
+        
+        return;
+    }
+    
+
     token* head = line->head;
     while(head->next != NULL)
     {
@@ -18,8 +27,15 @@ void freeLine(line* line)
        free(last);
     }
 
-    free(head);
-    free(line->linestart);
+    if(head!=NULL)
+    {
+        free(head);
+    }
+    if(line->linestart!=NULL)
+    {
+        free(line->linestart);
+    }
+
     free(line);
 }
 

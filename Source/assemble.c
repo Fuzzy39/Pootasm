@@ -8,61 +8,17 @@
 
 
 static const char* DefExplain = "Expected Syntax: .DEF <FILENAME>\n";
+static const char* OrgExplain = "Expected Syntax: .ORG <ADDRESS>\n";
 
-static void freeSection(section* sect)
+
+
+
+static language* getLanguage(FILE* file, int* lineNum, char* filename)
 {
-    // basically we just need to free chunks and then ourself.
-    // we expect the caller to keep a hold of the next element.
-    chunk* ch = sect->head;
-    while(ch != NULL)
-    {
-        free(ch->data);
-        free(ch->label);
-        chunk* next = ch->next;
-        free(ch);
-        ch = next;
-    }
-    free(sect);
-}
-
-void freeOutput(output* output)
-{
-    if(output==NULL)
-    {
-        return;
-    }
-
-    freeLanguage(output->lang);
-    symbol* sym = output->labels;
-
-    while(sym != NULL)
-    {
-        free(sym->name);
-        symbol* next = sym->next;
-        free(sym);
-        sym = next;
-    }
-
-    // free sections
-    section* sect = output->head;
-    while(sect != NULL)
-    {
-        section* next = sect->next;
-        freeSection(sect);
-        sect = next;
-    }
-}
-
-
-
-
-static language* getLanguage(FILE* file, char* filename)
-{
-    int lineNumber = 0;
-
+   
     line* line;
 
-    if(GetTokensFromNextLine( &line, file, lineNumber)==EOF)
+    if(GetTokensFromNextLine( &line, file, *lineNum)==EOF)
     {
         printf("Error in '%s', Line 0: First statement must be .DEF directive.\n%s", filename, DefExplain);
         freeLine(line);
@@ -70,9 +26,11 @@ static language* getLanguage(FILE* file, char* filename)
         return NULL;
     }
 
+    *lineNum = line->lineNum;
+
     if(strcmp(line->head->value, ".DEF") != 0)
     {
-        printf("Error in '%s', Line %d: First statement must be .DEF directive.\n%s", filename, line->lineNum, DefExplain);
+        printf("Error in '%s', Line %d: First statement must be .DEF directive.\n%s", filename, *lineNum, DefExplain);
         freeLine(line);
       
         return NULL;
@@ -81,7 +39,7 @@ static language* getLanguage(FILE* file, char* filename)
 
     if(line->head->next == NULL)
     {
-        printf("Error in '%s', Line %d: .DEF directive requires a file name.\n%s", filename, line->lineNum, DefExplain);
+        printf("Error in '%s', Line %d: .DEF directive requires a file name.\n%s", filename, *lineNum, DefExplain);
         freeLine(line);
         return NULL;
     }
@@ -122,7 +80,157 @@ static language* getLanguage(FILE* file, char* filename)
 
 }
 
-output* decodeSymbols(char* filename)
+// makes a chunk at the end of a section.
+static chunk* newChunk(section* sect)
+{
+    chunk* ch = malloc(sizeof(ch));
+    if(ch==NULL)
+    {
+        printf("malloc failed in newChunk");
+        return NULL;
+    }
+
+    // you know, maybe I could just use calloc?
+    ch->data = NULL;
+    ch->label = NULL;
+    ch ->labelLineNumber = 0;
+    ch ->length = 0;
+    ch ->next = NULL;
+
+    // attach
+    if(sect->head == NULL)
+    {
+        sect->head = ch;
+        return ch;
+    }
+
+    chunk* last = sect->head;
+    while(last->next!=NULL)
+    {
+        last = last->next;
+    }
+    last->next = ch;
+    return ch;
+
+}
+
+// creates a new section.
+static section* newSection(output* out, line* line, int linenum, char* filename)
+{
+    // we know for a fact that this line is an org directive.
+    if(tokenCount(line)!=2)
+    {
+         printf("Error in '%s', Line %d: Invalid syntax for .ORG directive.\n%s", filename, linenum, OrgExplain);
+         return NULL;
+    }
+
+    token* location = getToken(line, 1);
+
+    if(!checkLiteral(&linenum, location, filename))
+    {
+        return NULL;
+    }
+
+    int address = processLiteral(location);
+
+    section* sect = malloc(sizeof(sect));
+    if(sect==NULL)
+    {
+        printf("malloc failed in newSection");
+        return NULL;
+    }
+
+    sect->head = NULL;
+    sect->location = address;
+    sect->next = NULL;
+
+    newChunk(sect);
+
+    return sect;
+}
+
+
+
+// totally a normal amount of parameters.
+static int processDirective(output* out, line* line, int linenum, char* filename, section** sect, chunk** chunk)
+{
+     // we know this is in fact an org directive.
+    char* directive = line->head->value;
+    if(!strcmp(directive, ".ORG"))
+    {
+        section* old = *sect;
+        *sect = newSection(out, line, linenum, filename);
+        if(*sect!=NULL)
+        {
+            *chunk = (*sect)->head;
+            if(old == NULL)
+            {
+                out->head = *sect;
+            }
+            else
+            {
+                old->next = *sect;
+            }
+        }
+        return *sect != NULL;
+            
+    }
+
+    if(!strcmp(directive, ".DEF"))
+    {
+        printf("Error in '%s', Line %d: Invalid context for .DEF directive.\n", filename, linenum);
+        return 0;
+    }
+    
+    printf("Error in '%s', Line %d: Unknown directive '%s'\n", filename, linenum, directive);
+    return 0;
+}
+
+
+
+
+static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filename)
+{
+    section* currentSect = NULL;
+    chunk* currentChunk = NULL;
+
+    line* line = NULL;
+    while(GetTokensFromNextLine( &line, file, *lineNum)!=EOF)
+    {
+       
+        if(currentSect == NULL && strcmp(line->head->value, ".ORG")!=0)
+        {
+            printf("Error in '%s', Line %d: Expected .ORG directive, not '%s'\n%s", filename, *lineNum, line->head->value, OrgExplain);
+            freeLine(line);
+            freeOutput(out);
+            return NULL;
+        }
+
+        // directive(s).
+        if(*(line->head->value)== '.')
+        {
+           
+            if(processDirective(out, line, *lineNum, filename, &currentSect, &currentChunk))
+            {
+                continue;
+            }
+
+            freeLine(line);
+            freeOutput(out);
+            return NULL;
+        }
+
+
+        // Normal processing goes here.
+
+        freeLine(line);
+    }
+  
+    return out;
+
+}
+
+output* firstPass(char* filename)
 {
 
     FILE* file = fopen(filename, "r");
@@ -135,9 +243,9 @@ output* decodeSymbols(char* filename)
         // since when does malloc fail, right?
         return NULL;
     }
-
+    int lineNumber = 0;
     // First thing's first, get the language definition.
-    language* lang = getLanguage(file, filename);
+    language* lang = getLanguage(file, &lineNumber, filename);
     if(lang == NULL)
     {
         fclose(file);
@@ -157,8 +265,17 @@ output* decodeSymbols(char* filename)
     out->lang = lang;
     out->head = NULL; // we intend to fill this.
     out->labels = NULL; // will remain null for the rest of this function.
-    
-    // for now.
+
+    out = decodeSymbols(out, file, &lineNumber, filename);
+
+    // quickly make sure the file wasn't basically empty.
+    if(out !=NULL &&out->head == NULL )
+    {
+        printf("Error in '%s', Line %d: Expected .ORG directive.\n%s", filename, lineNumber, OrgExplain);
+        freeOutput(out);
+        return NULL;
+    }
+
     return out;
    
 }
