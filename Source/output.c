@@ -1,35 +1,69 @@
 #include "assemble.h"
 #include "define.h"
-#include "parsing.h"
+#include "Parsing/parsing.h"
 #include <stdio.h>
 #include <math.h>
 
 
 
 
-void debugPrintOutput(output* out, char base)
+static void printChunk(language* lang, chunk* ch, char base)
 {
-    if(out==NULL)
+    // Okay, it's been a couple days, what was I doing?
+    // first print the data
+
+    printf("\t");
+    for(int i = 0; i<ch->length; i++)
     {
-        printf("Output NULL.\n");
+        int word = ch->data[i];
+        if(!printAsLiteral(word, lang->width, base, stdout))
+        {
+            // error
+            printf("?");
+        }
+        
+        // completely arbitrary choice.
+        if(i % 16 == 0)
+        {
+            printf("\n");
+        }
+        else
+        {
+            printf(" ");
+        }
+
     }
 
-    printf( "Assembler Output:\n\n");
-
-    printLanguage(out->lang);
-
-    printf("\n");
-    printLabels(out, base);
-
-    // next up, the actual data.
-    section* sect = out->head;
-    while(sect!=NULL)
+    if(ch->label == NULL)
     {
-        printSection(out->lang, sect, base);
-        sect = sect->next;
+        printf("\n");
+        return;
     }
 
-    // and that's it! nice.
+    printf("\n'%s'", ch->label);
+
+}
+
+
+static void printSection(language* lang, section* sect, char base)
+{
+    int addr = lang->width*lang->address;
+
+    printf("Section @");
+    if(!printAsLiteral(sect->location, addr, base, stdout))
+    {
+        printf("ERROR");
+    }
+    printf(":\n");
+
+    // Now just print chunks. it's that easy!
+    chunk* chunk = sect->head;
+    while(chunk!=NULL)
+    {
+        printChunk(lang, chunk, base);
+        chunk = chunk->next;
+    }
+
 }
 
 static void printLabels(output* out, char base)
@@ -37,6 +71,7 @@ static void printLabels(output* out, char base)
     if(out->labels == NULL)
     {
         printf("0 Labels.\n");
+        return;
     }
 
     printf("%d Labels:\n", symbolCount(out->labels));
@@ -56,27 +91,35 @@ static void printLabels(output* out, char base)
     
 }
 
-static void printSection(language* lang, section* sect, char base)
+
+void debugPrintOutput(output* out, char base)
 {
-    int addr = lang->width*lang->address;
-
-    printf("Section @");
-    if(!printAsLiteral(sect->location, addr, base, stdout))
+    if(out==NULL)
     {
-        printf("ERROR");
-    }
-    printf(":\n");
-
-    // Now just print chunks. it's that easy!
-    chunk* chunk = sect->head;
-    while(chunk!=NULL)
-    {
-        printChunk()
+        printf("Output NULL.\n");
+        return;
     }
 
+    printf( "Assembler Output:\n\n");
+
+    printLanguage(out->lang);
+
+    printf("\n");
+    printLabels(out, base);
+
+    // next up, the actual data.
+    section* sect = out->head;
+    while(sect!=NULL)
+    {
+        printSection(out->lang, sect, base);
+        sect = sect->next;
+    }
+
+    printf("End.\n");
+
+    // and that's it! nice.
 }
 
-static void printChunk()
 
 
 void writeOutput(output* out, int padding, FILE* stream)

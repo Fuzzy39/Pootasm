@@ -23,7 +23,7 @@ struct output
 
 struct section
 {
-    int address;
+    int location;
     section* next;
     chunk* head;
 };
@@ -33,6 +33,7 @@ struct chunk
 {
     unsigned int length; // The length, in dwords, of data this chunk contains. 
     unsigned int* data; 
+    int labelLineNumber; // the line number the label was on.
     char* label;            // optionally(for the last chunk), an unknown label after the end of the data.
     chunk* next;
 };
@@ -43,11 +44,13 @@ struct chunk
 
 
 
-output* decodeSymbols(FILE* file, char* filename);
+output* decodeSymbols(char* filename);
 
 output* decodeLabels(output* partial, char* filename);
 
-void debugPrintOutput(output* out, char base, FILE* stream);
+output* finalizeOutput(output* partial, char* filename);
+
+void debugPrintOutput(output* out, char base);
 
 void writeOutput(output* out, int padding, FILE* stream);
 

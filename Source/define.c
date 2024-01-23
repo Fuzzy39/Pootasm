@@ -380,11 +380,13 @@ language* readDefines(char* fileName)
     language* toReturn = processHeader(&lineNum, definesFile);
     if(toReturn==NULL)
     {
+        fclose(definesFile);
         return NULL;
     }
 
     if(!readSymbols(&lineNum, definesFile, toReturn))
     {
+        fclose(definesFile);
         return NULL;
     }    
     
