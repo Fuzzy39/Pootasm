@@ -10,11 +10,10 @@ void freeLine(line* line)
 {
     // we don't free any char* here because
     // we're expecting nextline to deal with it.
-    //printLine(line);
+    printLine(line);
 
     if(line == NULL)
     {
-        
         return;
     }
     
@@ -24,18 +23,20 @@ void freeLine(line* line)
     {
        token* last = head;
        head = head->next; 
+  
        free(last);
     }
 
-    if(head!=NULL)
-    {
-        free(head);
-    }
+    printf("%I64u",_msize(line->linestart) ); 
+    
     if(line->linestart!=NULL)
     {
+        printf("Freeing linestart. '%s'\n", line->linestart);
         free(line->linestart);
-    }
+    }   
 
+
+    printf("Freed everything but the line!.\n");
     free(line);
 }
 
@@ -134,6 +135,7 @@ static int getTokensFromLine(token** head, FILE* stream, char** line)
 int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
 {
     // start off by initializing the line struct.
+    printf("LINE! %d\n", lastLineNumber);
     *line = malloc(sizeof(struct line));
    
     if(line == NULL)
@@ -151,7 +153,14 @@ int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
     while( (*line)->head == NULL)
     {
         (*line)->lineNum++;
+        printf( "%d\n",(*line)->lineNum);
+        if((*line)->linestart !=NULL)
+        {
+            free((*line)->linestart);
+            (*line)->linestart = NULL;
 
+        }
+        // maybe?
         if(getTokensFromLine(&((*line)->head), stream, &((*line)->linestart))==EOF)
         {
             // if this method returns EOF then tokens are never initialized.
@@ -160,6 +169,7 @@ int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
 
             return EOF;
         }
+        
 
     }
 

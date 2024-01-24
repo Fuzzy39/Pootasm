@@ -154,6 +154,7 @@ static section* newSection(output* out, line* line, int linenum, char* filename)
 // totally a normal amount of parameters.
 static int processDirective(output* out, line* line, int linenum, char* filename, section** sect, chunk** chunk)
 {
+   
      // we know this is in fact an org directive.
     char* directive = line->head->value;
     if(!strcmp(directive, ".ORG"))
@@ -172,6 +173,7 @@ static int processDirective(output* out, line* line, int linenum, char* filename
                 old->next = *sect;
             }
         }
+        
         return *sect != NULL;
             
     }
@@ -197,11 +199,12 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
     line* line = NULL;
     while(GetTokensFromNextLine( &line, file, *lineNum)!=EOF)
     {
-       
+        printf("loop");
         if(currentSect == NULL && strcmp(line->head->value, ".ORG")!=0)
         {
             printf("Error in '%s', Line %d: Expected .ORG directive, not '%s'\n%s", filename, *lineNum, line->head->value, OrgExplain);
             freeLine(line);
+            
             freeOutput(out);
             return NULL;
         }
@@ -212,15 +215,18 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
            
             if(processDirective(out, line, *lineNum, filename, &currentSect, &currentChunk))
             {
+                printf("this probably didn't happen");
+                freeLine(line);
+                printf("Continuing!");
                 continue;
             }
-
+            printf("ORG ERROR");
             freeLine(line);
             freeOutput(out);
             return NULL;
         }
 
-
+        printf("lazy.");
         // Normal processing goes here.
 
         freeLine(line);

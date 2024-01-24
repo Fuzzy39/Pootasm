@@ -1,5 +1,5 @@
 .def def.txt
-.org 0
+.org 1
     You could imagine code going here,
     but the assembler ignores this for now.
     

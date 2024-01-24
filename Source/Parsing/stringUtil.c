@@ -45,7 +45,8 @@ int getline(char** lineptr, size_t *n, FILE* stream)
 {
     *n = 0;
     int chars = 0;
-    
+    *lineptr = NULL;
+
     while(1)
     {
             
