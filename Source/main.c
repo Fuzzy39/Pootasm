@@ -3,6 +3,8 @@
 #include "assemble.h"
 #include "parsing/parsing.h"
 
+// edited in linux
+
 void define()
 {
     language* lang = readDefines("test.txt");
