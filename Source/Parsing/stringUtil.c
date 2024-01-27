@@ -101,16 +101,20 @@ static char* makeToken(char* current, token** tail)
         return current;
     }
 
-
+    printf("Attempt to malloc token...");
     // make a new thingy and copy stuff over.
     token* new = malloc(sizeof(token));
 
+    
     if(new == NULL)
     {
         printf("Malloc for token failed. Line being read is dead.\n");
         *current = '\0';
         return current;
     }
+
+    printf("worked.\n");
+
 
     if(*tail!= NULL)
     {
@@ -163,7 +167,11 @@ token* makeTokens(char* line)
     {
         line = findNextContent(line);
         line = makeToken(line, &tail);
-      
+        if(tail!=NULL)
+        {
+            printf("Token '%s'\n", tail->value);
+        }
+
         if(head == NULL)
         {
             head = tail;

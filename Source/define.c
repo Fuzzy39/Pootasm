@@ -73,6 +73,10 @@ void printLanguage(language* lang)
 
 void freeLanguage(language* lang)
 {
+    if(lang==NULL)
+    {
+        return;
+    }
     // first, free symbols.
     symbol* sym = lang->head;
 
@@ -227,6 +231,18 @@ static language* processHeader(int* lineNum, FILE* file, char* filename)
     return lang;
 
 }
+
+
+static char *strdup(const char *s) {
+    size_t size = strlen(s) + 1;
+    char *p = malloc(size);
+    if (p) {
+        memcpy(p, s, size);
+    }
+    return p;
+}
+
+
 
 static symbol* readSymbol(line* line, char* filename)
 {

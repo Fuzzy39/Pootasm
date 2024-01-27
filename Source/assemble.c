@@ -83,7 +83,7 @@ static language* getLanguage(FILE* file, int* lineNum, char* filename)
 // makes a chunk at the end of a section.
 static chunk* newChunk(section* sect)
 {
-    chunk* ch = malloc(sizeof(ch));
+    chunk* ch = malloc(sizeof(chunk));
     if(ch==NULL)
     {
         printf("malloc failed in newChunk");
@@ -133,7 +133,7 @@ static section* newSection(output* out, line* line, int linenum, char* filename)
 
     int address = processLiteral(location);
 
-    section* sect = malloc(sizeof(sect));
+    section* sect = malloc(sizeof(section));
     if(sect==NULL)
     {
         printf("malloc failed in newSection");
@@ -199,7 +199,9 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
     line* line = NULL;
     while(GetTokensFromNextLine( &line, file, *lineNum)!=EOF)
     {
-        printf("loop");
+       
+        *lineNum = (line)->lineNum;
+        printf("Got line %d\n", *lineNum);
         if(currentSect == NULL && strcmp(line->head->value, ".ORG")!=0)
         {
             printf("Error in '%s', Line %d: Expected .ORG directive, not '%s'\n%s", filename, *lineNum, line->head->value, OrgExplain);
@@ -215,18 +217,17 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
            
             if(processDirective(out, line, *lineNum, filename, &currentSect, &currentChunk))
             {
-                printf("this probably didn't happen");
                 freeLine(line);
-                printf("Continuing!");
+               
                 continue;
             }
-            printf("ORG ERROR");
+         
             freeLine(line);
             freeOutput(out);
             return NULL;
         }
 
-        printf("lazy.");
+        
         // Normal processing goes here.
 
         freeLine(line);

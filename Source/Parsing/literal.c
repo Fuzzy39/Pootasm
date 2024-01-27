@@ -199,11 +199,15 @@ static int isNumberInBounds(char* number, int radix, int bits)
 {
    
 
-    unsigned int maxValue = 1 << (bits);
-    maxValue--;
+    unsigned int maxValue;
+   
     if(bits >= 32)
     {
        maxValue = UINT_MAX;
+    }
+    else
+    {
+         maxValue = 1 << (bits)--;
     }
 
     unsigned int value = 0;
@@ -347,9 +351,44 @@ static long long intPow(long long x, int y)
     return toRet;
 }
 
-// this function doesn't do its job very well. large bits and bases make it hang.
-// will I fix it?
-// no.
+
+static int intToString(int num, int strsize, int digits, char** str, int radix)
+{
+     **str='\0';
+
+    if(digits>strsize)
+    {
+        return 0;
+    }
+
+    if(radix>16|| radix<2)
+    {
+        return 0;
+    }
+
+    const char* values = "0123456789ABCDEF";
+    int zeros = strsize-digits;
+    int i =0;
+    for(; i<zeros; i++)
+    {
+        (*str)[i]='0';
+    }
+
+    digits--;
+    while(digits)
+    {
+        i++;
+        int pow = intPow(radix,digits);
+        (*str)[i]=values[num/pow];
+        num-=(num/pow)*pow;
+    }
+    i++;
+    (*str)[i]='\0';
+    return 1;
+
+}
+
+
 int printAsLiteral(int num, int bits, char base, FILE* stream)
 {
     int radix = radixFromBase(base);
@@ -359,46 +398,37 @@ int printAsLiteral(int num, int bits, char base, FILE* stream)
         return 0;
     }
 
-    // next, get how many digits the number should be
-    int digits = 1;
-    int max = radix-1;
-    while(1)
+    if(num>intPow(2, bits))
     {
-        //printf("target: %ld current %d digits: %d\n", intPow(2, bits)-1, max, digits);
-        if((intPow(2, bits)-1)<=max)
-        {
-            break;
-        }
-        digits++;
-        max=intPow(radix,digits)-1;
-       
+        return 0; // number too large.
     }
 
+    if(bits>32 || bits<2)
+    {
+        return 0;
+    }
+
+    // next, get how many digits the number should be
+    int stringLen = floor(log(intPow(2, bits))/log(radix))+1;
+    int digits =  floor(log(intPow(2, num))/log(radix))+1;
+
     // digits should be right now?
-    char* toPrint = malloc((digits+1)*sizeof(char));
+    char* toPrint = malloc((stringLen+1)*sizeof(char));
     if(toPrint == NULL)
     {
         return 0;
     }
 
-    if(!itoa(num, toPrint, radix))
+    if(!intToString(num, stringLen, digits, &toPrint, radix))
     {
         printf("itoa failed");
         free(toPrint);
         return 0;
     }
 
-    int zeros = digits-strlen(toPrint);
-    //printf("DIGITS: %d, ZEROS: %d\n", digits, zeros);
-    if(zeros)
-    {
-        fprintf(stream, "%0*d%s", zeros, 0, toPrint);
-    }
-    else
-    {
-        fprintf(stream, "%s", toPrint);
-    }
-
+    
+    
+    fprintf(stream, "%s", toPrint);
     free(toPrint);
     return 1;
 
