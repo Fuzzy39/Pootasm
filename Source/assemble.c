@@ -201,7 +201,6 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
     {
        
         *lineNum = (line)->lineNum;
-        printf("Got line %d\n", *lineNum);
         if(currentSect == NULL && strcmp(line->head->value, ".ORG")!=0)
         {
             printf("Error in '%s', Line %d: Expected .ORG directive, not '%s'\n%s", filename, *lineNum, line->head->value, OrgExplain);
@@ -274,12 +273,13 @@ output* firstPass(char* filename)
     out->labels = NULL; // will remain null for the rest of this function.
 
     out = decodeSymbols(out, file, &lineNumber, filename);
-
+    fclose(file);
     // quickly make sure the file wasn't basically empty.
     if(out !=NULL &&out->head == NULL )
     {
         printf("Error in '%s', Line %d: Expected .ORG directive.\n%s", filename, lineNumber, OrgExplain);
         freeOutput(out);
+        
         return NULL;
     }
 

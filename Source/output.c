@@ -48,6 +48,8 @@ void freeOutput(output* output)
         freeSection(sect);
         sect = next;
     }
+
+    free(output);
 }
 
 

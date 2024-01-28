@@ -3,7 +3,6 @@
 #include "assemble.h"
 #include "Parsing/parsing.h"
 
-// edited in linux
 
 void define()
 {
@@ -12,12 +11,22 @@ void define()
     freeLanguage(lang);
 }
 
-
-int main(void)
+void assembleTest()
 {
-    //define();
+     
     output* out = firstPass("test.txt");
     debugPrintOutput(out, 'D');
     freeOutput(out);
+}
+
+void printTest()
+{
+    
+}
+
+
+int main(void)
+{
+   
 
 }

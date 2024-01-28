@@ -227,7 +227,7 @@ static language* processHeader(int* lineNum, FILE* file, char* filename)
     }
   
     //printf("ADDRESS: %d!\n", lang->address);
-
+    freeLine(line);
     return lang;
 
 }
@@ -382,6 +382,7 @@ language* readDefines(char* fileName)
         return NULL;
     }    
     
+    fclose(definesFile);
     return toReturn;
 
 
