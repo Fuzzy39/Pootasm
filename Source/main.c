@@ -4,6 +4,7 @@
 #include "Parsing/parsing.h"
 
 
+// An edit to show that I configured git correctly
 void define()
 {
     language* lang = readDefines("DEF.TXT");
@@ -28,6 +29,6 @@ void printTest()
 
 int main(void)
 {
-   printTest();
-
+   //printTest();
+    assembleTest();
 }
