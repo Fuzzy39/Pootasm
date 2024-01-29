@@ -21,12 +21,13 @@ void assembleTest()
 
 void printTest()
 {
-    
+    printAsLiteral(12, 16, 'X', stdout);
+    printf("\n");
 }
 
 
 int main(void)
 {
-   
+   printTest();
 
 }
