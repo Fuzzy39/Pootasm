@@ -4,6 +4,8 @@
 #include "Parsing/parsing.h"
 
 
+
+
 // An edit to show that I configured git correctly
 void define()
 {
@@ -22,13 +24,31 @@ void assembleTest()
 
 void printTest()
 {
-    printAsLiteral(12, 16, 'X', stdout);
+    printAsLiteral(0x1FF, 9, 'X', stdout);
     printf("\n");
+
+    printAsLiteral(15, 4, 'X', stdout);
+    printf("\n");
+
+    printAsLiteral(0x80000000, 32, 'B', stdout);
+    printf("\n");
+
+    printAsLiteral(-1, 32, 'B', stdout);
+    printf("\n");
+
+    printAsLiteral(0xFFFF, 16, 'D', stdout);
+    printf("\n");
+
+    printAsLiteral(300, -1, 'X', stdout);
+    printf("\n");
+    
 }
 
 
 int main(void)
 {
-   //printTest();
-    assembleTest();
+
+    
+    printTest();
+    //assembleTest();
 }

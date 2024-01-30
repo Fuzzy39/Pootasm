@@ -338,8 +338,13 @@ unsigned int processLiteral(token* literal)
 // y can't be 0 or negative
 // y should be small or this overflows
 // it's fine, for our case.
-static long long intPow(long long x, int y)
+static unsigned long long intPow(long long x, int y)
 {
+    if(!y)
+    {
+        return 1;
+    }
+
     long long toRet = x;
     y--;
     while(y>0)
@@ -351,12 +356,18 @@ static long long intPow(long long x, int y)
     return toRet;
 }
 
-
-static int intToString(int num, int strsize, int digits, char** str, int radix)
+/// @brief Converts an int to a string.
+/// @param num number to convert.
+/// @param strsize the size of the string in bytes, including the null character.
+/// @param digits the number of nonzero characters expected in the string.
+/// @param str a pointer to a pointer of a string.
+/// @param radix radix. Expected value is from 2-16.
+/// @return 1 on success. 0 on failure.
+int intToString(unsigned int num, size_t strsize, int digits, char** str, int radix)
 {
-     **str='\0';
+    **str='\0';
 
-    if(digits>strsize)
+    if(digits>=strsize)
     {
         return 0;
     }
@@ -367,7 +378,7 @@ static int intToString(int num, int strsize, int digits, char** str, int radix)
     }
 
     const char* values = "0123456789ABCDEF";
-    int zeros = strsize-digits;
+    int zeros = strsize-digits-1;
     int i =0;
     for(; i<zeros; i++)
     {
@@ -375,21 +386,23 @@ static int intToString(int num, int strsize, int digits, char** str, int radix)
     }
 
     digits--;
-    while(digits)
+    while(digits+1)
     {
-        i++;
+        
         int pow = intPow(radix,digits);
         (*str)[i]=values[num/pow];
         num-=(num/pow)*pow;
+        i++;
+        digits--;
+       
     }
-    i++;
     (*str)[i]='\0';
     return 1;
 
 }
 
 
-int printAsLiteral(int num, int bits, char base, FILE* stream)
+int printAsLiteral(unsigned int num, int bits, char base, FILE* stream)
 {
     int radix = radixFromBase(base);
     if(radix == -1)
@@ -398,19 +411,25 @@ int printAsLiteral(int num, int bits, char base, FILE* stream)
         return 0;
     }
 
-    if(num>intPow(2, bits))
-    {
-        return 0; // number too large.
-    }
-
-    if(bits>32 || bits<2)
+    if(bits!=-1 &&( bits>32 || bits<2))
     {
         return 0;
     }
 
+    if(num>intPow(2, bits) && bits!=-1)
+    {
+        return 0; // number too large.
+    }
+
+   
+
     // next, get how many digits the number should be
-    int stringLen = floor(log(intPow(2, bits))/log(radix))+1;
-    int digits =  floor(log(intPow(2, num))/log(radix))+1;
+    int stringLen = ceil(log(intPow(2, bits))/log(radix));
+    int digits =  floor(log(num)/log(radix))+1;
+    if(bits == -1)
+    {
+        stringLen = digits;
+    }
 
     // digits should be right now?
     char* toPrint = malloc((stringLen+1)*sizeof(char));
@@ -419,9 +438,9 @@ int printAsLiteral(int num, int bits, char base, FILE* stream)
         return 0;
     }
 
-    if(!intToString(num, stringLen, digits, &toPrint, radix))
+    if(!intToString(num, stringLen+1, digits, &toPrint, radix))
     {
-        printf("itoa failed");
+        printf("ERROR");
         free(toPrint);
         return 0;
     }
