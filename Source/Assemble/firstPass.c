@@ -227,7 +227,7 @@ static int decodeToken(language* lang, token* token, section* sect, chunk** ch, 
     }
     else
     {
-        symbol* sym =findSymbol(lang, token->value);
+        symbol* sym =findSymbol(lang->head, token->value);
         if(sym == NULL)
         {
             if(*(token->value)=='.')

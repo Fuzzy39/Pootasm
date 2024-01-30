@@ -5,16 +5,12 @@
 #include "../Headers/pootasm.h"
 
 
-symbol* findSymbol(language* lang, char* name)
+symbol* findSymbol(symbol* head, char* name)
 {
-    symbol* sym = lang->head;
-    if(sym==NULL)
-    {
-        // if the language has no symbols, abort.
-        return NULL;
-    }
+    symbol* sym = head;
+   
 
-    while(sym->next != NULL)
+    while(sym != NULL)
     {
         char* compareAgainst = sym->name;
         if(strcmp(name, compareAgainst) == 0) 
