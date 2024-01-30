@@ -34,6 +34,7 @@ struct section
 /// @brief A chunk of binary data with a symbol on the end.
 struct chunk
 {
+    size_t bytes;
     unsigned int length; // The length, in dwords, of data this chunk contains. 
     unsigned int* data; 
     int labelLineNumber; // the line number the label was on.
@@ -46,6 +47,8 @@ struct chunk
 // but will actually be in as many ints as ADDRESS is for the language.
 
 
+
+int EndOfSection(int addrWidth, section* sect);
 
 output* firstPass(char* filename);
 

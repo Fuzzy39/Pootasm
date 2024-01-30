@@ -1,7 +1,12 @@
 .def def.txt
-.org 1
-    You could imagine code going here,
-    but the assembler ignores this for now.
+
+; this is an example program that counts up with pooter.
+; it's one of the three valid interesting programs
+.org 0
+    STA 0o1
+    SWP
+loop:
+    ADD
+    JNZ loop
+    STP
     
-.org 0o40 ; 40 octal, should be 20 in hex. 
-    What a shame.

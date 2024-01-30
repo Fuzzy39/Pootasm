@@ -24,7 +24,10 @@ struct language
     symbol* head;
 };
 
-
+/// @brief 
+/// @param lang 
+/// @param name 
+/// @return 
 symbol* findSymbol(language* lang, char* name);
 
 int symbolCount(symbol* head);

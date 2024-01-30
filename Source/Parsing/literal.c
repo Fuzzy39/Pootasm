@@ -325,7 +325,7 @@ int checkLiteral(int* lineNum, token* token, char* filename)
 
     if(!isValidLiteral(token))
     {
-        printf("Error in '%s', Line %d: Expected number literal instead of '%s'.\n", filename, *lineNum, token->value); 
+        printf("Error in '%s', Line %d: Number literal '%s' is malformed.\n", filename, *lineNum, token->value); 
         return 0;  
     }
 

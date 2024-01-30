@@ -3,6 +3,25 @@
 #include "../Headers/pootasm.h"
 
 
+int EndOfSection(int addrWidth, section* sect)
+{
+    int end = sect->location;
+    chunk* ch = sect->head;
+
+    while(ch!=NULL)
+    {
+        end += ch->length;
+        if(ch->label != NULL)
+        {
+            end += addrWidth;
+        }
+        ch = ch->next;
+    }
+
+    return end;
+}
+
+
 static void freeSection(section* sect)
 {
     // basically we just need to free chunks and then ourself.
@@ -59,16 +78,16 @@ static void printChunk(language* lang, chunk* ch, char base)
     for(int i = 0; i<ch->length; i++)
     {
         int word = ch->data[i];
-        if(!printNumber(word, lang->width, base, stdout))
+        if(!printNumber(word, -1, base, stdout))
         {
             // error
-            printf("?");
+            printf("?(%u)", word);
         }
         
         // completely arbitrary choice.
-        if(i % 16 == 0)
+        if(i % 16 == 15)
         {
-            printf("\n");
+            printf("\n\t");
         }
         else
         {
@@ -83,7 +102,7 @@ static void printChunk(language* lang, chunk* ch, char base)
         return;
     }
 
-    printf("\n'%s'", ch->label);
+    printf("\n\t'%s'\n", ch->label);
 
 }
 

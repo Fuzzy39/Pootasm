@@ -88,6 +88,7 @@ static chunk* newChunk(section* sect)
     }
 
     // you know, maybe I could just use calloc?
+    ch ->bytes = 0;
     ch->data = NULL;
     ch->label = NULL;
     ch ->labelLineNumber = 0;
@@ -186,7 +187,145 @@ static int processDirective(output* out, line* line, int linenum, char* filename
 }
 
 
+static int isLabel(char* str)
+{
+    int i = 0;
+    while(str[i]!='\0')
+    {
+        i++;
+    }
 
+    i--;
+    return str[i]==':'; 
+}
+
+static int decodeToken(language* lang, token* token, section* sect, chunk** ch, int* lineNum, char* filename)
+{
+    // allocate more space in the chunk if needbe.
+    chunk* current = *ch;
+    if(current->bytes<=current->length*sizeof(int))
+    {   
+        current->bytes += 10*sizeof(int);
+        current->data = realloc(current->data, current->bytes);
+        if(current->data == NULL)
+        {
+            printf("Internal Error while parsing '%s', around Line %d: Couldn't allocate memory.\n", filename, *lineNum);
+            return 0;
+        }
+    }
+
+    int newData;
+    // determine the value of the token if possible.
+    if(isLiteral(token))
+    {
+        if(!checkLiteral(lineNum, token, filename))
+        {
+            return 0;
+        }
+
+        newData = processLiteral(token);
+    }
+    else
+    {
+        symbol* sym =findSymbol(lang, token->value);
+        if(sym == NULL)
+        {
+            if(*(token->value)=='.')
+            {
+                 printf("Error in '%s', Line %d: Directive '%s' must be at the start of a line.\n", filename, *lineNum, token->value);
+                 return 0;
+            }
+
+            // this is a label.
+            current->label = malloc(strlen(token->value));
+            if(current->label == NULL)
+            {
+                printf("Internal Error while parsing '%s', around Line %d: Couldn't allocate memory.\n", filename, *lineNum);
+                return 0;
+            }
+            
+            memcpy(current->label, token->value, strlen(token->value)+1);
+
+            current->labelLineNumber=*lineNum;
+
+            // we need to create a new chunk.
+            *ch = newChunk(sect);
+            return (ch != NULL);
+         
+        }
+
+        newData = sym->value;
+        
+    }
+
+    // cram the data in.
+    current->data[current->length]=newData;
+    current->length++;
+
+    return 1;
+}
+
+
+static int decodeLine(language* lang, line* line, section* sect, chunk** ch, int* lineNum, char* filename)
+{
+    int tokens = tokenCount(line);
+    // obviously not the most effecient, but I can, so I will.
+    for(int i=0; i<tokens; i++)
+    {
+        if(!decodeToken(lang, getToken(line, i), sect, ch, lineNum, filename))
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+static int makeLabel(char* name, output* out, section* sect)
+{
+    // allocate a new space for the thing
+    symbol* label = malloc(sizeof(symbol));
+    if(label == NULL)
+    {
+        printf("Malloc failed in makeLabel.\n");
+        return 0;
+    }
+
+
+    // attach it to the list.
+    symbol* last = out->labels;
+    
+    if(last !=NULL)
+    {
+        while(last->next !=NULL)
+        {
+            last = last->next;
+        }
+
+        last->next = label;
+    }
+    else
+    {
+        out->labels = label;
+    }
+
+    // initialize.
+    label->value = EndOfSection(out->lang->address, sect);
+    label->next = NULL;
+    label->name = malloc(strlen(name)); // no +1 since we're removing the colon.
+    if(label->name == NULL)
+    {
+        printf("Malloc failed in makeLabel.\n");
+        return 0;
+    }
+    memcpy(label->name, name, strlen(name));
+    label->name[strlen(name)-1]='\0';
+
+    return 1;
+
+
+
+}
 
 static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filename)
 {
@@ -224,7 +363,38 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
         }
 
         
-        // Normal processing goes here.
+        // The line is not a directive. It could be a label.
+        if(tokenCount(line)==1 && isLabel(line->head->value))
+        {
+            // label processing goes here.
+            if(strlen(line->head->value)==1)
+            {
+                printf("Error in '%s', Line %d: Invalid label '%s'.\n", filename, *lineNum, (line->head->value));
+                freeOutput(out);
+                freeLine(line);
+                return NULL;
+
+            }
+
+            if(!makeLabel(line->head->value, out, currentSect))
+            {
+                freeOutput(out);
+                freeLine(line);
+                return NULL;
+
+            }
+            freeLine(line);
+            continue;
+        }
+
+        // standard line processing.
+        // how are chunks allocated? realloc, of course!
+        if(!decodeLine(out->lang, line, currentSect, &currentChunk, lineNum, filename))
+        {
+            freeLine(line);
+            freeOutput(out);
+            return NULL;
+        }
 
         freeLine(line);
     }

@@ -38,6 +38,9 @@ void printTest()
 
     printNumber(300, -1, 'X', stdout);
     printf("\n");
+
+    printNumber(0, -1, 'X', stdout);
+    printf("\n");
     
 }
 

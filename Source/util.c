@@ -217,6 +217,12 @@ int printNumber(unsigned int num, int bits, char base, FILE* stream)
     // next, get how many digits the number should be
     int stringLen = ceil(log(intPow(2, bits))/log(radix));
     int digits =  floor(log(num)/log(radix))+1;
+
+    if(num==0)
+    {
+        digits = 1;
+    }
+
     if(bits == -1)
     {
         stringLen = digits;
