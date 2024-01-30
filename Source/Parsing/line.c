@@ -1,10 +1,9 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "parsing.h"
-#include "stringUtil.h"
+#include "../Headers/pootasm.h"
+
 
 void freeLine(line* line)
 {
@@ -114,6 +113,86 @@ token* getToken(line* line, int index)
 
     return head;
 }
+
+static char* makeToken(char* current, token** tail)
+{
+    if(*current == '\0')
+    {
+        return current;
+    }
+
+    // make a new thingy and copy stuff over.
+    token* new = malloc(sizeof(token));
+
+    
+    if(new == NULL)
+    {
+        printf("Malloc for token failed. Line being read is dead.\n");
+        *current = '\0';
+        return current;
+    }
+
+ 
+
+
+    if(*tail!= NULL)
+    {
+        (*tail)->next = new;
+       
+    }
+
+
+    *tail = new;
+    (*tail)->value = current; 
+    (*tail)->next = NULL;
+
+   
+    // now we find the end of the token and plop a \0 character there.
+    while(*current != '\0')
+    {
+        if(*current == ';')
+        {
+            // short circuit on comments
+            *current = '\0';
+            return current;
+        }
+
+        if(isspace(*current))
+        {
+            *current = '\0';
+            current += sizeof(char);
+            return current;
+        }
+
+        current+= sizeof(char);
+    }
+
+    return current;
+
+
+}
+
+static token* makeTokens(char* line)
+{
+    // line is a malloced pointer.
+    // the tokens will survive until  the next line, when they should be destroyed.
+    token* head = NULL;
+    token* tail = head;
+
+    while(*line != '\0')
+    {
+        line = findNextContent(line);
+        line = makeToken(line, &tail);
+
+        if(head == NULL)
+        {
+            head = tail;
+        }
+    }
+
+    return head;
+}
+
 
 static int getTokensFromLine(token** head, FILE* stream, char** line)
 {

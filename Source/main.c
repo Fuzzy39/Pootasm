@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include "define.h"
-#include "assemble.h"
-#include "Parsing/parsing.h"
-
+#include "Headers/pootasm.h"
 
 
 
@@ -24,22 +21,22 @@ void assembleTest()
 
 void printTest()
 {
-    printAsLiteral(0x1FF, 9, 'X', stdout);
+    printNumber(0x1FF, 9, 'X', stdout);
     printf("\n");
 
-    printAsLiteral(15, 4, 'X', stdout);
+    printNumber(15, 4, 'X', stdout);
     printf("\n");
 
-    printAsLiteral(0x80000000, 32, 'B', stdout);
+    printNumber(0x80000000, 32, 'B', stdout);
     printf("\n");
 
-    printAsLiteral(-1, 32, 'B', stdout);
+    printNumber(-1, 32, 'B', stdout);
     printf("\n");
 
-    printAsLiteral(0xFFFF, 16, 'D', stdout);
+    printNumber(0xFFFF, 16, 'D', stdout);
     printf("\n");
 
-    printAsLiteral(300, -1, 'X', stdout);
+    printNumber(300, -1, 'X', stdout);
     printf("\n");
     
 }
@@ -49,6 +46,6 @@ int main(void)
 {
 
     
-    printTest();
-    //assembleTest();
+    //printTest();
+    assembleTest();
 }

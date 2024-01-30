@@ -1,4 +1,7 @@
-#include "define.h"
+#ifndef ASSEMBLE_H   /* Include guard */
+#define ASSEMBLE_H
+
+#include "language.h"
 #include <stdio.h>
 
 struct output;
@@ -56,3 +59,4 @@ void writeOutput(output* out, int padding, FILE* stream);
 
 void freeOutput(output* output);
 
+#endif

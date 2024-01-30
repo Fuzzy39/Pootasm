@@ -1,9 +1,6 @@
-#include "assemble.h"
-#include "define.h"
-#include "Parsing/parsing.h"
 #include <stdio.h>
 #include <math.h>
-
+#include "../Headers/pootasm.h"
 
 
 static void freeSection(section* sect)
@@ -62,7 +59,7 @@ static void printChunk(language* lang, chunk* ch, char base)
     for(int i = 0; i<ch->length; i++)
     {
         int word = ch->data[i];
-        if(!printAsLiteral(word, lang->width, base, stdout))
+        if(!printNumber(word, lang->width, base, stdout))
         {
             // error
             printf("?");
@@ -125,7 +122,7 @@ static void printLabels(output* out, char base)
     while (lab!=NULL)
     {
         printf("\t'%s': ",lab->name);
-        if(!printAsLiteral(lab->value, out->lang->width*out->lang->address, base, stdout))
+        if(!printNumber(lab->value, out->lang->width*out->lang->address, base, stdout))
         {
             printf("ERROR");
         }
@@ -165,8 +162,3 @@ void debugPrintOutput(output* out, char base)
 }
 
 
-
-void writeOutput(output* out, int padding, FILE* stream)
-{
-    printf("writeOutput is not implemented\n");
-}

@@ -1,10 +1,7 @@
-#include "assemble.h"
-#include "define.h"
-#include "Parsing/parsing.h"
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-
+#include "../Headers/pootasm.h"
 
 
 static const char* DefExplain = "Expected Syntax: .DEF <FILENAME>\n";
@@ -285,18 +282,6 @@ output* firstPass(char* filename)
 
     return out;
    
-}
-
-output* decodeLabels(output* partial, char* filename)
-{
-    printf("decodelabels not implemented.");
-    return NULL;
-}
-
-output* finalizeOutput(output* partial, char* filename)
-{
-    printf("finalizeOutput not implemented.");
-    return NULL;
 }
 
 

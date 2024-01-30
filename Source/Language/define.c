@@ -1,96 +1,12 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "define.h"
-#include "Parsing/parsing.h"
+#include "../Headers/pootasm.h"
 
 static const char* WidthExplain = "Expected Syntax: \"WIDTH <bits>\".\n";
 static const char* AddressExplain = "Expected Syntax: \"ADDRESSS <words>\"\n";
 static const char* SymbolExplain = "Expected Syntax: \"SYMBOL <name> <value>\"\n";
-
-symbol* findSymbol(language* lang, char* name)
-{
-    symbol* sym = lang->head;
-    if(sym==NULL)
-    {
-        // if the language has no symbols, abort.
-        return NULL;
-    }
-
-    while(sym->next != NULL)
-    {
-        char* compareAgainst = sym->name;
-        if(strcmp(name, compareAgainst) == 0) 
-        {
-            // Now, my understanding is this method will only return 0 if the strings exactly match.
-            // if that's not the case then this is obviously wrong.
-            return sym;
-        }
-
-        sym = sym->next;
-    }
-
-    return NULL;
-}
-
-int symbolCount(symbol* head)
-{
-    int count = 0;
-    symbol* sym = head;
-    while(sym!=NULL)
-    {
-        count++;
-        sym = sym->next;
-    }
-    return count;
-}
-
-
-void printLanguage(language* lang)
-{
-    if(lang == NULL)
-    {
-        printf("NULL language.\n");
-        return;
-    }
-
-    printf("Language:\n");
-    printf("WIDTH: %d bits.\n", lang->width);
-    printf("ADDRESS: %d bits.\n", (lang->width)*(lang->address));
-
-    // print symbols now.
-    printf("\n%d symbols:\n", symbolCount(lang->head));
-    symbol* sym = lang->head;
-
-    while(sym != NULL)
-    {
-        printf("\t%s: %d\n", sym->name, sym->value);
-        sym = sym->next;
-    }
-}
-
-void freeLanguage(language* lang)
-{
-    if(lang==NULL)
-    {
-        return;
-    }
-    // first, free symbols.
-    symbol* sym = lang->head;
-
-    while(sym != NULL)
-    {
-        free(sym->name);
-        symbol* next = sym->next;
-        free(sym);
-        sym = next;
-    }
-
-    free(lang);
-}
-
 
 static int getWidth(int lineNum, line* line, char* filename)
 {
@@ -233,14 +149,6 @@ static language* processHeader(int* lineNum, FILE* file, char* filename)
 }
 
 
-static char *strdup(const char *s) {
-    size_t size = strlen(s) + 1;
-    char *p = malloc(size);
-    if (p) {
-        memcpy(p, s, size);
-    }
-    return p;
-}
 
 
 

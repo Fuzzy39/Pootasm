@@ -75,14 +75,6 @@ int isLiteralInBounds(token* literal, int bits);
 unsigned int processLiteral(token* literal);
 
 
-/// @brief 
-/// @param num Number to print.
-/// @param bits The number of bits that this number takes up. This determines how many leading zeroes there are, if any.
-/// -1 for 'as many as required' (up to 32, the maximum)
-/// @param base the base to print in. options are B, O, D, and X for base 2, 8, 10, and 16.
-/// @param stream 
-/// @return 
-int printAsLiteral(unsigned int num, int bits, char base, FILE* stream);   
 
 /// @brief checks if a token is a valid literal.
 /// @param lineNum 

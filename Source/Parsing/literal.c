@@ -3,7 +3,7 @@
 #include <string.h>
 #include <limits.h>
 #include <math.h>
-#include "parsing.h"
+#include "../Headers/pootasm.h"
 
 
 static int isValidDigit(char digit, char base)
@@ -173,26 +173,6 @@ static int charVal(char digit)
     // should never happen, in any case.
 }
 
-static int radixFromBase(char base)
-{
-    
-    switch(base)
-    {
-        case 'B':
-            return 2;       
-        case 'O':
-            return 8;
-        case 'D':
-            return 10;
-            break;
-        case 'X':
-            return 16;
-        default:
-            return -1;
-    }
-}
-
-
 
 
 static int isNumberInBounds(char* number, int radix, int bits)
@@ -334,126 +314,6 @@ unsigned int processLiteral(token* literal)
     return toReturn;
 
 }
-
-// y can't be 0 or negative
-// y should be small or this overflows
-// it's fine, for our case.
-static unsigned long long intPow(long long x, int y)
-{
-    if(!y)
-    {
-        return 1;
-    }
-
-    long long toRet = x;
-    y--;
-    while(y>0)
-    {
-        toRet*=x;
-        y--;
-    }
-
-    return toRet;
-}
-
-/// @brief Converts an int to a string.
-/// @param num number to convert.
-/// @param strsize the size of the string in bytes, including the null character.
-/// @param digits the number of nonzero characters expected in the string.
-/// @param str a pointer to a pointer of a string.
-/// @param radix radix. Expected value is from 2-16.
-/// @return 1 on success. 0 on failure.
-int intToString(unsigned int num, size_t strsize, int digits, char** str, int radix)
-{
-    **str='\0';
-
-    if(digits>=strsize)
-    {
-        return 0;
-    }
-
-    if(radix>16|| radix<2)
-    {
-        return 0;
-    }
-
-    const char* values = "0123456789ABCDEF";
-    int zeros = strsize-digits-1;
-    int i =0;
-    for(; i<zeros; i++)
-    {
-        (*str)[i]='0';
-    }
-
-    digits--;
-    while(digits+1)
-    {
-        
-        int pow = intPow(radix,digits);
-        (*str)[i]=values[num/pow];
-        num-=(num/pow)*pow;
-        i++;
-        digits--;
-       
-    }
-    (*str)[i]='\0';
-    return 1;
-
-}
-
-
-int printAsLiteral(unsigned int num, int bits, char base, FILE* stream)
-{
-    int radix = radixFromBase(base);
-    if(radix == -1)
-    {
-        // base was bad.
-        return 0;
-    }
-
-    if(bits!=-1 &&( bits>32 || bits<2))
-    {
-        return 0;
-    }
-
-    if(num>intPow(2, bits) && bits!=-1)
-    {
-        return 0; // number too large.
-    }
-
-   
-
-    // next, get how many digits the number should be
-    int stringLen = ceil(log(intPow(2, bits))/log(radix));
-    int digits =  floor(log(num)/log(radix))+1;
-    if(bits == -1)
-    {
-        stringLen = digits;
-    }
-
-    // digits should be right now?
-    char* toPrint = malloc((stringLen+1)*sizeof(char));
-    if(toPrint == NULL)
-    {
-        return 0;
-    }
-
-    if(!intToString(num, stringLen+1, digits, &toPrint, radix))
-    {
-        printf("ERROR");
-        free(toPrint);
-        return 0;
-    }
-
-    
-    
-    fprintf(stream, "%s", toPrint);
-    free(toPrint);
-    return 1;
-
-    
-}
-
 
 int checkLiteral(int* lineNum, token* token, char* filename)
 {
