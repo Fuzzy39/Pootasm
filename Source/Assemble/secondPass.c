@@ -34,7 +34,7 @@ static int getWord(unsigned int packed, int bits, int index)
 
 static bool delabelSection(output* out, section* sect, char* filename)
 {
-    chunk* ch = malloc(sizeof(ch));
+    chunk* ch = malloc(sizeof(chunk));
     if(ch == NULL)
     {
         printf("Malloc failed in delabelSection.");
@@ -59,8 +59,8 @@ static bool delabelSection(output* out, section* sect, char* filename)
     unsigned int* data = ch->data;
     while(current!=NULL)
     {
-        memcpy(data, current->data, current->length);
-        data += current->bytes;
+        memcpy(data, current->data, current->length*sizeof(int));
+        data += current->length;
         
         // process labels, if possible.
         if(current->label != NULL)
@@ -69,19 +69,22 @@ static bool delabelSection(output* out, section* sect, char* filename)
             if(label==NULL)
             {
                 printf("Error in '%s', Line %d: Unkown symbol '%s'\n", filename, current->labelLineNumber, current->label);
+                return false;
 
             }
             // label found.
             int packed = label->value;
             for(int i = 0; i<out->lang->address; i++)
             {
-                *data= getWord(packed, out->lang->width, i);
-                data+=sizeof(int);
+                *data = getWord(packed, out->lang->width, i);
+                data+=1;
+               
             }
         }
 
-        chunk* next = ch->next;
+        chunk* next = current->next;
         free(current->data);
+        free(current->label);
         free(current);
         current = next;
     }
@@ -95,6 +98,11 @@ static bool delabelSection(output* out, section* sect, char* filename)
 
 output* decodeLabels(output* partial, char* filename)
 {
+    if(partial == NULL)
+    {
+        return NULL;
+    }
+    
     section* sect = partial->head;
     while(sect!=NULL)
     {

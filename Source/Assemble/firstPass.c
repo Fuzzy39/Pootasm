@@ -162,7 +162,7 @@ static int processDirective(output* out, line* line, int linenum, char* filename
         if(*sect!=NULL)
         {
             // figure out if this section is after the previous section.
-            if(old->location<=(*sect)->location)
+            if(old!=NULL && old->location>(*sect)->location)
             {
                 printf("Error in '%s', Line %d: This section must begin after the previous one.\n", filename, linenum);
                 return 0;
@@ -244,7 +244,7 @@ static int decodeToken(language* lang, token* token, section* sect, chunk** ch, 
             }
 
             // this is a label.
-            current->label = malloc(strlen(token->value));
+            current->label = malloc(strlen(token->value)+1);
             if(current->label == NULL)
             {
                 printf("Internal Error while parsing '%s', around Line %d: Couldn't allocate memory.\n", filename, *lineNum);

@@ -4,9 +4,14 @@
 ; it's one of the three valid interesting programs
 .org 0
     STA 0o1
-    NOP
     SWP
+loop:
     ADD
-    JNZ 
+    JNZ loop
     STP
-    
+    SWP
+    SWP
+    SWP
+
+.org 1
+    NOP

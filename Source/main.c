@@ -17,8 +17,12 @@ void assembleTest()
     output* out = firstPass("test.txt");
     out = decodeLabels(out, "test.txt");
     out = finalizeOutput(out, "test.txt");
-    debugPrintOutput(out, 'D');
-    freeOutput(out);
+    if( out!=NULL)
+    {
+        printf("++++++ FINAL OUTPUT ++++++++++\n");
+        debugPrintOutput(out, 'D');
+        freeOutput(out);
+    }
 }
 
 void printTest()

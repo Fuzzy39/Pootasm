@@ -58,6 +58,10 @@ output* finalizeOutput(output* partial, char* filename);
 
 void debugPrintOutput(output* out, char base);
 
+/// @brief 
+/// @param out 
+/// @param padding 
+/// @param stream 
 void writeOutput(output* out, int padding, FILE* stream);
 
 void freeOutput(output* output);
