@@ -9,9 +9,3 @@ loop:
     ADD
     JNZ loop
     STP
-    SWP
-    SWP
-    SWP
-
-.org 1
-    NOP

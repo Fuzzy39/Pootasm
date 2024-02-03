@@ -21,6 +21,7 @@ void assembleTest()
     {
         printf("++++++ FINAL OUTPUT ++++++++++\n");
         debugPrintOutput(out, 'D');
+        writeBinary(out, 0, "out.bin");
         freeOutput(out);
     }
 }
