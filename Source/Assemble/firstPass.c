@@ -161,6 +161,13 @@ static int processDirective(output* out, line* line, int linenum, char* filename
         *sect = newSection(out, line, linenum, filename);
         if(*sect!=NULL)
         {
+            // figure out if this section is after the previous section.
+            if(old->location<=(*sect)->location)
+            {
+                printf("Error in '%s', Line %d: This section must begin after the previous one.\n", filename, linenum);
+                return 0;
+            }
+
             *chunk = (*sect)->head;
             if(old == NULL)
             {

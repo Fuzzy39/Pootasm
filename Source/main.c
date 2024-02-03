@@ -15,10 +15,8 @@ void assembleTest()
 {
      
     output* out = firstPass("test.txt");
-    printf("pass 1:\n");
-    debugPrintOutput(out, 'D');
     out = decodeLabels(out, "test.txt");
-    printf("Pass 2:\n");
+    out = finalizeOutput(out, "test.txt");
     debugPrintOutput(out, 'D');
     freeOutput(out);
 }
@@ -47,6 +45,8 @@ void printTest()
     printf("\n");
     
 }
+
+
 
 
 int main(void)
