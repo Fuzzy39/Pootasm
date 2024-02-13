@@ -16,8 +16,10 @@ static void PadUntilAddress(int* current, int addr, int padding, FILE* stream)
     }
 }
 
-static void WriteWord(int index, int pads,  section* sect, int padding, FILE*stream)
+static void WriteWord(int index, int pads,  int words, section* sect, int padding, FILE*stream)
 {
+    printf("Pads: %d\n", pads);
+
     // do blank pads
     for(int i =0; i<pads; i++)
     {
@@ -34,7 +36,7 @@ static void WriteWord(int index, int pads,  section* sect, int padding, FILE*str
     bytes[2] = (num>>8)&0xFF;
     bytes[3] = (num)&0xFF;
 
-    for(int i=3; i>pads; i--)
+    for(int i=3; i>=4-words; i--)
     {
         putc(bytes[i], stream);
     }
@@ -53,9 +55,9 @@ static void WriteSection(int* current, language* lang, section* sect, int paddin
     }
     int pads = padding-words;
 
-    while(*current<=addr)
+    while(*current<addr)
     {
-        WriteWord(i, pads, sect, padding, stream);
+        WriteWord(i, pads, words, sect, padding, stream);
         (*current)++;
         i++;
     }
@@ -79,6 +81,7 @@ static void writeOutput(output* out, int padding, FILE* stream)
             padding++;
         }
     }
+
 
     int current = 0;
 

@@ -9,3 +9,8 @@ loop:
     ADD
     JNZ loop
     STP
+    example
+
+.org 0x22
+example:
+    STP
