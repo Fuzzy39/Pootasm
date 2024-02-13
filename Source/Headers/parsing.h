@@ -47,8 +47,9 @@ token* getToken(line* line, int index);
 /// @brief fills *head with a linked list of tokens from the next line with content.
 /// @param head A probably null pointer. will be filled with tokens on success.
 /// @param stream 
+/// @param caseSensitive Whether to preserve case.
 /// @return returns 1 on success. returns -1 on eof.
-int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber);
+int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber, int caseSensitive);
 
 
 // ######################### LITERALS #####################

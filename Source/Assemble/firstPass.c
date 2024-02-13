@@ -15,7 +15,7 @@ static language* getLanguage(FILE* file, int* lineNum, char* filename)
    
     line* line;
 
-    if(GetTokensFromNextLine( &line, file, *lineNum)==EOF)
+    if(GetTokensFromNextLine( &line, file, *lineNum, 1)==EOF)
     {
         printf("Error in '%s', Line 0: First statement must be .DEF directive.\n%s", filename, DefExplain);
         freeLine(line);
@@ -24,6 +24,7 @@ static language* getLanguage(FILE* file, int* lineNum, char* filename)
     }
 
     *lineNum = line->lineNum;
+    toUppercase(line->head->value);
 
     if(strcmp(line->head->value, ".DEF") != 0)
     {
@@ -288,6 +289,23 @@ static int decodeLine(language* lang, line* line, section* sect, chunk** ch, int
     return 1;
 }
 
+
+static int crimpToBits(int value, int bits)
+{
+    
+    int mask = 1;
+    bits--;
+    while(bits)
+    {
+        mask = mask <<1;
+        mask++;
+        bits--;
+    }
+
+    return value & mask;
+}
+
+
 static int makeLabel(char* name, output* out, section* sect)
 {
     // allocate a new space for the thing
@@ -317,7 +335,7 @@ static int makeLabel(char* name, output* out, section* sect)
     }
 
     // initialize.
-    label->value = EndOfSection(out->lang->address, sect);
+    label->value = crimpToBits(EndOfSection(out->lang->address, sect), out->lang->address*out->lang->width);
     label->next = NULL;
     label->name = malloc(strlen(name)); // no +1 since we're removing the colon.
     if(label->name == NULL)
@@ -340,7 +358,7 @@ static output* decodeSymbols(output* out, FILE* file, int* lineNum, char* filena
     chunk* currentChunk = NULL;
 
     line* line = NULL;
-    while(GetTokensFromNextLine( &line, file, *lineNum)!=EOF)
+    while(GetTokensFromNextLine( &line, file, *lineNum, 0)!=EOF)
     {
        
         *lineNum = (line)->lineNum;

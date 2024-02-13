@@ -194,7 +194,7 @@ static token* makeTokens(char* line)
 }
 
 
-static int getTokensFromLine(token** head, FILE* stream, char** line)
+static int getTokensFromLine(token** head, FILE* stream, char** line, int caseSensitive)
 {
 
     size_t len = 0; // don't care about this.
@@ -203,14 +203,18 @@ static int getTokensFromLine(token** head, FILE* stream, char** line)
         return EOF;
     }
 
-
-    toUppercase(*line);
+    if(!caseSensitive)
+    {
+        toUppercase(*line);
+    }
 
     *head = makeTokens(*line);
     return 1;
 }
 
-int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
+
+
+int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber, int caseSensitive)
 {
     // start off by initializing the line struct.
    
@@ -239,7 +243,7 @@ int GetTokensFromNextLine(line** line, FILE* stream, int lastLineNumber)
 
         }
         // maybe?
-        if(getTokensFromLine(&((*line)->head), stream, &((*line)->linestart))==EOF)
+        if(getTokensFromLine(&((*line)->head), stream, &((*line)->linestart), caseSensitive)==EOF)
         {
             // if this method returns EOF then tokens are never initialized.
             free((*line)->linestart);

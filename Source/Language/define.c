@@ -92,7 +92,7 @@ static language* processHeader(int* lineNum, FILE* file, char* filename)
     
     // ########### WIDTH #############
     line* line = NULL;
-    if(GetTokensFromNextLine(&line, file, *lineNum)==EOF)
+    if(GetTokensFromNextLine(&line, file, *lineNum, 0)==EOF)
     {
         printf("Error in '%s', Line %d: Expected WIDTH declaration. \n%s", filename, *lineNum+1, WidthExplain);
         
@@ -120,7 +120,7 @@ static language* processHeader(int* lineNum, FILE* file, char* filename)
     freeLine(line);
     line = NULL;
 
-    if(GetTokensFromNextLine(&line, file, *lineNum)==EOF)
+    if(GetTokensFromNextLine(&line, file, *lineNum, 0)==EOF)
     {
         printf("Error in '%s', Line %d: Expected ADDRESS declaration. \n%s", filename, *lineNum+1, AddressExplain);
         
@@ -226,7 +226,7 @@ static int readSymbols(int* lineNum, FILE* file, language* lang, char* filename)
     line* line = NULL;
     symbol* last = NULL;
 
-    while(GetTokensFromNextLine(&line, file, *lineNum)!=EOF)
+    while(GetTokensFromNextLine(&line, file, *lineNum, 0)!=EOF)
     {
        
         
