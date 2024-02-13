@@ -1,5 +1,5 @@
 width 3 ; original pooter assembly language.
-address 1 
+address 2 
     ; technically, the ISA can support larger addresses, but can only jump between the lowest 3 bits.
     ; although it basically sucks and can't do anything anyways, so a bit of a moot point.
 

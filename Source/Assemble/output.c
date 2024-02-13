@@ -18,7 +18,7 @@ static void PadUntilAddress(int* current, int addr, int padding, FILE* stream)
 
 static void WriteWord(int index, int pads,  int words, section* sect, int padding, FILE*stream)
 {
-    printf("Pads: %d\n", pads);
+   
 
     // do blank pads
     for(int i =0; i<pads; i++)

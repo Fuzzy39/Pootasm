@@ -76,7 +76,7 @@ static bool delabelSection(output* out, section* sect, char* filename)
             int packed = label->value;
             for(int i = 0; i<out->lang->address; i++)
             {
-                *data = getWord(packed, out->lang->width, i);
+                *data = getWord(packed, out->lang->width, (out->lang->address-1)-i);
                 data+=1;
                
             }

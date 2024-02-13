@@ -11,6 +11,7 @@ loop:
     STP
     example
 
-.org 0x22
+
+.org 0o42   
 example:
-    STP
+    STP example
