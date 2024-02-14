@@ -2,7 +2,7 @@
 
 ; this is an example program that counts up with pooter.
 ; it's one of the three valid interesting programs
-.org 0
+.org 300
     STA 0o1
     SWP
 loop:
