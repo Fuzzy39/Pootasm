@@ -2,6 +2,10 @@
 A very simple generic assembler that can be adapted for different processors, at least theoretically.
 Realistically, it is not particularly usable for any real processor. It was created mainly as a project to become more familiar with C.
 
+line x
+
+line 2
+
 ## Command Line Usage
 **pootasm** *input_file* \[**\-hvb**:**o**:**p**::]
     + **-v**: Print a detailed description of the program's output, including a list of symbols and labels.
