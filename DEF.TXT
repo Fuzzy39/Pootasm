@@ -12,3 +12,4 @@ symbol SWP 0o4      ; swap A and B.
 symbol JNZ 0b101    ; Argument: lowest 3 bits of the address to jump to.
 symbol ADD 0o6      ; A+B -> A
 symbol SUB 0b111    ; A-B -> A (I think, could be other way around? Not clear.)
+symbol MAX 010
