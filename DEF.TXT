@@ -1,7 +1,7 @@
 width 3 ; original pooter assembly language.
 address 2 
-    ; technically, the ISA can support larger addresses, but can only jump between the lowest 3 bits.
-    ; although it basically sucks and can't do anything anyways, so a bit of a moot point.
+; technically, the ISA can support larger addresses, but can only jump between the lowest 3 bits.
+; although it basically sucks and can't do anything anyways, so a bit of a moot point.
 
 ; symbols are very simple, and don't care about the syntax that surrounds them.
 symbol NOP 0        ; pootasm can support decimal, binary, octal, and hexadecimal literals.

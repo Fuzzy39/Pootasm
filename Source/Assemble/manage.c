@@ -159,10 +159,8 @@ void debugPrintOutput(output* out, char base)
         printf("Output NULL.\n");
         return;
     }
-
-    printf( "Assembler Output:\n\n");
-
-    printLanguage(out->lang);
+    
+    printLanguage(out->lang, base);
 
     printf("\n");
     printLabels(out, base);

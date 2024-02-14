@@ -39,7 +39,7 @@ int symbolCount(symbol* head)
 }
 
 
-void printLanguage(language* lang)
+void printLanguage(language* lang, char base)
 {
     if(lang == NULL)
     {
@@ -48,16 +48,18 @@ void printLanguage(language* lang)
     }
 
     printf("Language:\n");
-    printf("WIDTH: %d bits.\n", lang->width);
-    printf("ADDRESS: %d bits.\n", (lang->width)*(lang->address));
+    printf("WIDTH: %d bits. (Decimal)\n", lang->width);
+    printf("ADDRESS: %d bits.\n (Decimal)", (lang->width)*(lang->address));
 
     // print symbols now.
-    printf("\n%d symbols:\n", symbolCount(lang->head));
+    printf("\n%d (Decimal) symbols:\n", symbolCount(lang->head));
     symbol* sym = lang->head;
 
     while(sym != NULL)
     {
-        printf("\t%s: %d\n", sym->name, sym->value);
+        printf("\t%s: ", sym->name);
+        printNumber(sym->value, -1, base, stdout);
+        printf("\n");
         sym = sym->next;
     }
 }

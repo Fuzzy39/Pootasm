@@ -32,7 +32,7 @@ symbol* findSymbol(symbol* head, char* name);
 
 int symbolCount(symbol* head);
 
-void printLanguage(language* lang);
+void printLanguage(language* lang, char base);
 
 void freeLanguage(language* lang);
 
