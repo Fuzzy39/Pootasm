@@ -49,7 +49,7 @@ The assembly file contains directives and assembly code, which is assembled into
 
 #### Directives
 
-The first line of an assembly file must have the .def directive. The .def directive has the format **.def** *filename*, and specifies a path to the language definition file. the filename is relative to the current working directory Pootasm was called from, and must not have multiple consecutive spaces. On linix like systems, the filename is interpreted as all caps.
+The first line of an assembly file must have the .def directive. The .def directive has the format **.def** *filename*, and specifies a path to the language definition file. the filename is relative to the current working directory Pootasm was called from, and must not have multiple consecutive spaces.
 
 The .org directive marks the beggining of an assembly section, and also defines the address that the assembly section will start from. It's format is **.org** *literal*. The literal is the Address that the section following it contains. each .org section must have a higher address than the previous.
 
